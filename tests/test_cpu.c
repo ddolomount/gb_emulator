@@ -1329,6 +1329,139 @@ void test_ccf(void)
     TEST_ASSERT_EQUAL_UINT8(FLAG_Z, cpu.f);
 }
 
+static void assert_branch_registers_unchanged(cpu_t *cpu)
+{
+    TEST_ASSERT_EQUAL_UINT8(0xA1, cpu->a);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu->b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu->c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu->d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu->e);
+    TEST_ASSERT_EQUAL_UINT8(0xA5, cpu->h);
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu->l);
+    TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu->sp);
+}
+
+void test_jr_imm8_forward(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x18, 0x05, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    TEST_ASSERT_EQUAL_UINT8(12, cycles);
+    TEST_ASSERT_EQUAL_UINT16(0x0107, cpu.pc);
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    assert_branch_registers_unchanged(&cpu);
+}
+
+void test_jr_imm8_backward(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x18, 0xFC, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    TEST_ASSERT_EQUAL_UINT8(12, cycles);
+    TEST_ASSERT_EQUAL_UINT16(0x00FE, cpu.pc);
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    assert_branch_registers_unchanged(&cpu);
+}
+
+void test_jr_cond_imm8_taken(void)
+{
+    const struct {
+        uint8_t opcode;
+        uint8_t flags;
+    } cases[] = {
+        {0x20, FLAG_N | FLAG_C},
+        {0x28, FLAG_Z | FLAG_H},
+        {0x30, FLAG_Z | FLAG_N},
+        {0x38, FLAG_C | FLAG_H},
+    };
+
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
+        uint8_t rom[0x200] = {0};
+        Memory_t memory;
+        Cartridge_t cartridge;
+        bus_t bus;
+
+        setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, cases[i].opcode, 0x05, 0x00);
+
+        cpu_t cpu = test_cpu_with_sentinel_registers();
+        cpu.f = cases[i].flags;
+
+        uint8_t cycles = cpu_step(&cpu, &bus);
+
+        TEST_ASSERT_EQUAL_UINT8(12, cycles);
+        TEST_ASSERT_EQUAL_UINT16(0x0107, cpu.pc);
+        TEST_ASSERT_EQUAL_UINT8(cases[i].flags, cpu.f);
+        assert_branch_registers_unchanged(&cpu);
+    }
+}
+
+void test_jr_cond_imm8_not_taken(void)
+{
+    const struct {
+        uint8_t opcode;
+        uint8_t flags;
+    } cases[] = {
+        {0x20, FLAG_Z | FLAG_C},
+        {0x28, FLAG_C},
+        {0x30, FLAG_Z | FLAG_C},
+        {0x38, FLAG_Z},
+    };
+
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
+        uint8_t rom[0x200] = {0};
+        Memory_t memory;
+        Cartridge_t cartridge;
+        bus_t bus;
+
+        setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, cases[i].opcode, 0x05, 0x00);
+
+        cpu_t cpu = test_cpu_with_sentinel_registers();
+        cpu.f = cases[i].flags;
+
+        uint8_t cycles = cpu_step(&cpu, &bus);
+
+        TEST_ASSERT_EQUAL_UINT8(8, cycles);
+        TEST_ASSERT_EQUAL_UINT16(0x0102, cpu.pc);
+        TEST_ASSERT_EQUAL_UINT8(cases[i].flags, cpu.f);
+        assert_branch_registers_unchanged(&cpu);
+    }
+}
+
+void test_stop(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x10, 0x00, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    TEST_ASSERT_EQUAL_UINT8(4, cycles);
+    TEST_ASSERT_EQUAL_UINT16(0x0102, cpu.pc);
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    assert_branch_registers_unchanged(&cpu);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -1374,5 +1507,10 @@ int main(void)
     RUN_TEST(test_cpl);
     RUN_TEST(test_scf);
     RUN_TEST(test_ccf);
+    RUN_TEST(test_jr_imm8_forward);
+    RUN_TEST(test_jr_imm8_backward);
+    RUN_TEST(test_jr_cond_imm8_taken);
+    RUN_TEST(test_jr_cond_imm8_not_taken);
+    RUN_TEST(test_stop);
     return UNITY_END();
 }

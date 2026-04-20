@@ -1,7 +1,5 @@
-#include <signal.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdio.h>
 #include "../include/cpu.h"
 
 #define BC_R16_ID 0
@@ -18,8 +16,14 @@
 #define HL_R8_ID 6
 #define A_R8_ID  7
 
-#define GET_R16_ID(opcode) ((opcode >> 4) & 0x03)
-#define GET_R8_ID(opcode)  ((opcode >> 3) & 0x07)
+#define COND_NZ_ID  0
+#define COND_Z_ID   1
+#define COND_NC_ID  2
+#define COND_C_ID   3
+
+#define GET_R16_ID(opcode)  ((opcode >> 4) & 0x03)
+#define GET_R8_ID(opcode)   ((opcode >> 3) & 0x07)
+#define GET_COND_ID(opcode) ((opcode >> 3) & 0x03) 
 
 #define SET_FLAG(cpu, flag, cond) \
     ((cpu)->f = (cond) ? ((cpu)->f | (flag)) : ((cpu)->f & ~(flag)))
@@ -270,6 +274,29 @@ static uint8_t cpu_get_r8(cpu_t *cpu, bus_t *bus, uint8_t reg_id)
     }
 }
 
+static bool condition_check(cpu_t *cpu, uint8_t cond_id)
+{
+    switch (cond_id)
+    {
+        case COND_NZ_ID:
+        {
+            return !cpu_get_flag(cpu, FLAG_Z);
+        }
+        case COND_Z_ID:
+        {
+            return cpu_get_flag(cpu, FLAG_Z);
+        }
+        case COND_NC_ID:
+        {
+            return !cpu_get_flag(cpu, FLAG_C);
+        }
+        case COND_C_ID:
+        {
+            return cpu_get_flag(cpu, FLAG_C);
+        }
+    }
+    return false;
+}
 
 /* Global Functions */
 
@@ -612,6 +639,46 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             cpu_set_flag(cpu, FLAG_N, false);
             cpu_set_flag(cpu, FLAG_H, false);
             cpu_set_flag(cpu, FLAG_C, carry);
+
+            cycle_count = 4;
+            break;
+        }
+        // jr imm8
+        case 0x18:
+        {
+            int8_t offset = (int8_t)bus_read8(bus, cpu->pc++);
+            cpu->pc += offset;
+
+            cycle_count = 12;
+            break;
+        }
+        // jr cond, imm8
+        case 0x20:
+        case 0x28:
+        case 0x30:
+        case 0x38:
+        {
+            uint8_t cond_id = GET_COND_ID(opcode);
+            int8_t offset = (int8_t)bus_read8(bus, cpu->pc++);
+           
+            if (condition_check(cpu, cond_id))
+            {
+                cpu->pc += offset;
+                cycle_count = 12;
+            }
+            else 
+            {
+                cycle_count = 8;
+            }
+            break;
+        }
+        // stop
+        case 0x10:
+        {
+            uint8_t stop_arg = bus_read8(bus, cpu->pc++);
+            (void)stop_arg;
+
+            // TODO: Handle stop behaviour
 
             cycle_count = 4;
             break;
