@@ -1,0 +1,52 @@
+#include "bus.h"
+
+void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge)
+{
+    bus->memory = memory;
+    bus->cartridge = cartridge;
+}
+
+uint8_t bus_read8(bus_t *bus, uint16_t addr)
+{
+    // Read from ROM
+    if (addr <= ROM_END_ADDR) 
+    {
+        if (addr >= bus->cartridge->rom_size)
+        {
+            return 0xFF;
+        }
+
+        return bus->cartridge->rom[addr];
+    }
+
+    // Read from VRAM
+    if (addr >= VRAM_START_ADDR && addr <= VRAM_END_ADDR)
+    {
+        return bus->memory->VRAM[addr - VRAM_START_ADDR];
+    }
+
+    // Read from WRAM
+    if (addr >= WRAM_START_ADDR && addr <= WRAM_END_ADDR)
+    {
+        return bus->memory->WRAM[addr - WRAM_START_ADDR];
+    }
+
+    // Read from OAM
+    if (addr >= OAM_START_ADDR && addr <= OAM_END_ADDR)
+    {
+        return bus->memory->OAM[addr - OAM_START_ADDR];
+    }
+
+    // Read from HRAM
+    if (addr >= HRAM_START_ADDR && addr <= HRAM_END_ADDR)
+    {
+        return bus->memory->HRAM[addr - HRAM_START_ADDR];
+    }
+
+    if (addr == IE_ADDR)
+    {
+        return bus->memory->ie;
+    }
+
+    return 0xFF;
+}

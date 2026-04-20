@@ -5,6 +5,20 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#define VRAM_START_ADDR 0x8000
+#define VRAM_END_ADDR 0x9FFF
+
+#define WRAM_START_ADDR 0xC000
+#define WRAM_END_ADDR 0xDFFF
+
+#define OAM_START_ADDR 0xFE00
+#define OAM_END_ADDR 0xFE9F
+
+#define HRAM_START_ADDR 0xFF80
+#define HRAM_END_ADDR 0xFFFE
+
+#define IE_ADDR 0xFFFF
+
 // Memory arrays
 typedef struct {
     uint8_t VRAM[0x2000];
@@ -14,7 +28,7 @@ typedef struct {
     uint8_t ie; 
 } Memory_t;
 
-uint8_t memory_read8(Memory_t *mem, uint16_t addr);
-void memory_write8(Memory_t *mem, uint16_t addr, uint8_t value);
+void memory_init(Memory_t *memory);
+void memory_reset(Memory_t *memory);
 
 #endif /* MEMORY_H */
