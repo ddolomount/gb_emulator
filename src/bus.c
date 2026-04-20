@@ -99,7 +99,7 @@ void bus_write8(bus_t *bus, uint16_t addr, uint8_t value)
 void bus_write16(bus_t *bus, uint16_t addr, uint16_t value)
 {
     uint8_t low_byte = (uint8_t)(value & 0xFF);
-    uint8_t high_byte = (uint8_t)((value >> 4) & 0xFF);
+    uint8_t high_byte = (uint8_t)((value >> 8) & 0xFF);
 
     bus_write8(bus, addr, low_byte);
     addr++;
