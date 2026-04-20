@@ -1,3 +1,4 @@
+#include <iso646.h>
 #include <signal.h>
 #include <string.h>
 #include "../include/cpu.h"
@@ -141,6 +142,7 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             cycle_count = 12;
             break;
         }
+        // ld [r16mem], a
         case 0x02:
         case 0x12:
         case 0x22:
@@ -151,6 +153,28 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             bus_write8(bus, r16mem, cpu->a);
 
             cycle_count = 8;
+            break;
+        }
+        // ld a, [r16mem]
+        case 0x0A:
+        case 0x1A:
+        case 0x2A:
+        case 0x3A:
+        {
+            // Read 16-bit value from r16mem and write it to A
+            uint16_t r16mem = cpu_get_r16mem(cpu, ((opcode >> 4) & 0x03));
+            uint8_t value = bus_read8(bus, r16mem);
+            cpu->a = value;
+            cycle_count = 8;
+            break;
+        }
+        // ld [imm16], sp
+        case 0x08:
+        {
+            uint16_t imm16_addr = bus_read8(bus, cpu->pc++); // Low byte
+            imm16_addr |= ((uint16_t)bus_read8(bus, cpu->pc++) << 8); // High byte
+            bus_write16(bus, imm16_addr, cpu->sp);
+            cycle_count = 20;
             break;
         }
     }
