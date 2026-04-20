@@ -533,6 +533,353 @@ void test_ld_imm16_mem_sp(void)
     TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu.sp);
 }
 
+static void assert_r16_one_byte_common_result(cpu_t *cpu, uint8_t cycles)
+{
+    TEST_ASSERT_EQUAL_UINT8(8, cycles);
+    TEST_ASSERT_EQUAL_UINT16(0x0101, cpu->pc);
+
+    TEST_ASSERT_EQUAL_UINT8(0xA1, cpu->a);
+}
+
+void test_inc_bc(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x03);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.b = 0x12;
+    cpu.c = 0xFF;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_r16_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0x13, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0x00, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0xA5, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu.l);
+    TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu.sp);
+}
+
+void test_inc_de(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x13);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.d = 0xFF;
+    cpu.e = 0xFF;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_r16_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0x00, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0x00, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0xA5, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu.l);
+    TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu.sp);
+}
+
+void test_inc_hl(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x23);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.h = 0x7F;
+    cpu.l = 0xFF;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_r16_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0x80, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x00, cpu.l);
+    TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu.sp);
+}
+
+void test_inc_sp(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x33);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.sp = 0xFFFF;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_r16_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0xA5, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu.l);
+    TEST_ASSERT_EQUAL_UINT16(0x0000, cpu.sp);
+}
+
+void test_dec_bc(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x0B);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.b = 0x13;
+    cpu.c = 0x00;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_r16_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0x12, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0xFF, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0xA5, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu.l);
+    TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu.sp);
+}
+
+void test_dec_de(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x1B);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.d = 0x00;
+    cpu.e = 0x00;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_r16_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0xFF, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0xFF, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0xA5, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu.l);
+    TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu.sp);
+}
+
+void test_dec_hl(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x2B);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.h = 0x80;
+    cpu.l = 0x00;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_r16_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0x7F, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0xFF, cpu.l);
+    TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu.sp);
+}
+
+void test_dec_sp(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x3B);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.sp = 0x0000;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_r16_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0xA5, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu.l);
+    TEST_ASSERT_EQUAL_UINT16(0xFFFF, cpu.sp);
+}
+
+static void assert_add_hl_r16_common_result(cpu_t *cpu, uint8_t cycles)
+{
+    TEST_ASSERT_EQUAL_UINT8(8, cycles);
+    TEST_ASSERT_EQUAL_UINT16(0x0101, cpu->pc);
+
+    TEST_ASSERT_EQUAL_UINT8(0xA1, cpu->a);
+    TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu->sp);
+}
+
+void test_add_hl_bc(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x09);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.b = 0x01;
+    cpu.c = 0x02;
+    cpu.h = 0x12;
+    cpu.l = 0x34;
+    cpu.f = FLAG_Z | FLAG_N | FLAG_H | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_add_hl_r16_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(FLAG_Z, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0x01, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0x02, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0x13, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x36, cpu.l);
+}
+
+void test_add_hl_de_sets_half_carry(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x19);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.d = 0x00;
+    cpu.e = 0x01;
+    cpu.h = 0x0F;
+    cpu.l = 0xFF;
+    cpu.f = FLAG_N | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_add_hl_r16_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(FLAG_H, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0x00, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0x01, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0x10, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x00, cpu.l);
+}
+
+void test_add_hl_hl_sets_carry_without_setting_zero(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x29);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.h = 0x80;
+    cpu.l = 0x00;
+    cpu.f = FLAG_N | FLAG_H;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_add_hl_r16_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(FLAG_C, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0x00, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x00, cpu.l);
+}
+
+void test_add_hl_sp_sets_half_carry_and_carry(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x39);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.h = 0xFF;
+    cpu.l = 0xFF;
+    cpu.sp = 0x0001;
+    cpu.f = FLAG_Z | FLAG_N;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    TEST_ASSERT_EQUAL_UINT8(8, cycles);
+    TEST_ASSERT_EQUAL_UINT16(0x0101, cpu.pc);
+
+    TEST_ASSERT_EQUAL_UINT8(FLAG_Z | FLAG_H | FLAG_C, cpu.f);
+    TEST_ASSERT_EQUAL_UINT8(0xA1, cpu.a);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu.b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu.c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu.d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu.e);
+    TEST_ASSERT_EQUAL_UINT8(0x00, cpu.h);
+    TEST_ASSERT_EQUAL_UINT8(0x00, cpu.l);
+    TEST_ASSERT_EQUAL_UINT16(0x0001, cpu.sp);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -551,5 +898,17 @@ int main(void)
     RUN_TEST(test_ld_a_hli_mem);
     RUN_TEST(test_ld_a_hld_mem);
     RUN_TEST(test_ld_imm16_mem_sp);
+    RUN_TEST(test_inc_bc);
+    RUN_TEST(test_inc_de);
+    RUN_TEST(test_inc_hl);
+    RUN_TEST(test_inc_sp);
+    RUN_TEST(test_dec_bc);
+    RUN_TEST(test_dec_de);
+    RUN_TEST(test_dec_hl);
+    RUN_TEST(test_dec_sp);
+    RUN_TEST(test_add_hl_bc);
+    RUN_TEST(test_add_hl_de_sets_half_carry);
+    RUN_TEST(test_add_hl_hl_sets_carry_without_setting_zero);
+    RUN_TEST(test_add_hl_sp_sets_half_carry_and_carry);
     return UNITY_END();
 }

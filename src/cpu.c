@@ -1,11 +1,36 @@
-#include <iso646.h>
-#include <signal.h>
+#include <stdint.h>
 #include <string.h>
 #include "../include/cpu.h"
 
+#define BC_R16_ID 0
+#define DE_R16_ID 1
+#define HL_R16_ID 2
+#define SP_R16_ID 3 
+
+#define GET_REG_ID(opcode) ((opcode >> 4) & 0x03)
+
+#define SET_FLAG(cpu, flag, cond) \
+    ((cpu)->f = (cond) ? ((cpu)->f | (flag)) : ((cpu)->f & ~(flag)))
+
 /* Static Functions */
 
+static void cpu_set_flag(cpu_t *cpu, uint8_t flag, bool set)
+{
+    if (set)
+        cpu->f |= flag;
+    else
+        cpu->f &= ~flag;
+}
 
+static inline bool half_carry_16_add(uint16_t a, uint16_t b)
+{
+    return ((a & 0x0FFF) + (b & 0x0FFF)) > 0x0FFF;
+}
+
+static inline bool carry_16_add(uint16_t a, uint16_t b)
+{
+    return ((uint32_t)a + (uint32_t)b) > 0xFFFF;
+}
 
 static void cpu_set_r16(cpu_t *cpu, uint8_t reg_id, uint16_t value)
 {
@@ -84,14 +109,14 @@ static uint16_t cpu_get_r16mem(cpu_t *cpu, uint8_t reg_id)
         {
             // hl+
             uint16_t hl = ((uint16_t)cpu->h << 8) | cpu->l;
-            cpu_set_r16(cpu, 2, hl + 1);
+            cpu_set_r16(cpu, HL_R16_ID, hl + 1);
             return hl;
         }
         case 3:
         {
             // hl-
             uint16_t hl = ((uint16_t)cpu->h << 8) | cpu->l;
-            cpu_set_r16(cpu, 2, hl - 1);
+            cpu_set_r16(cpu, HL_R16_ID, hl - 1);
             return hl;
         }
         default:
@@ -137,7 +162,7 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             uint16_t value = bus_read16(bus, cpu->pc);
             cpu->pc += 2;
 
-            cpu_set_r16(cpu, ((opcode >> 4) & 0x03), value);
+            cpu_set_r16(cpu, GET_REG_ID(opcode), value);
 
             cycle_count = 12;
             break;
@@ -149,7 +174,7 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
         case 0x32:
         {
             // Read 16-bit mem address and write A to it
-            uint16_t r16mem = cpu_get_r16mem(cpu, ((opcode >> 4) & 0x03));
+            uint16_t r16mem = cpu_get_r16mem(cpu, GET_REG_ID(opcode));
             bus_write8(bus, r16mem, cpu->a);
 
             cycle_count = 8;
@@ -162,7 +187,7 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
         case 0x3A:
         {
             // Read 16-bit value from r16mem and write it to A
-            uint16_t r16mem = cpu_get_r16mem(cpu, ((opcode >> 4) & 0x03));
+            uint16_t r16mem = cpu_get_r16mem(cpu, GET_REG_ID(opcode));
             uint8_t value = bus_read8(bus, r16mem);
             cpu->a = value;
             cycle_count = 8;
@@ -175,6 +200,55 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             imm16_addr |= ((uint16_t)bus_read8(bus, cpu->pc++) << 8); // High byte
             bus_write16(bus, imm16_addr, cpu->sp);
             cycle_count = 20;
+            break;
+        }
+        // inc r16
+        case 0x03:
+        case 0x13:
+        case 0x23:
+        case 0x33:
+        {
+            uint16_t r16 = cpu_get_r16(cpu, GET_REG_ID(opcode));
+            r16++;
+            cpu_set_r16(cpu, GET_REG_ID(opcode), r16);
+            cycle_count = 8;
+            break;
+        }
+        // dec r16
+        case 0x0B:
+        case 0x1B:
+        case 0x2B:
+        case 0x3B:
+        {
+            uint16_t r16 = cpu_get_r16(cpu, GET_REG_ID(opcode));
+            r16--;
+            cpu_set_r16(cpu, GET_REG_ID(opcode), r16);
+            cycle_count = 8;
+            break;
+        }
+        // add hl, r16
+        case 0x09:
+        case 0x19:
+        case 0x29:
+        case 0x39:
+        {
+            uint16_t r16 = cpu_get_r16(cpu, GET_REG_ID(opcode));
+            uint16_t hl = cpu_get_r16(cpu, HL_R16_ID);
+
+            uint16_t result = hl + r16;
+          
+            // N flag cleared
+            cpu->f &= ~FLAG_N;
+
+            // Check hald carry and carry flags
+            bool half_carry = half_carry_16_add(r16, hl);
+            bool carry = carry_16_add(r16, hl);
+
+            cpu_set_flag(cpu, FLAG_H, half_carry);
+            cpu_set_flag(cpu, FLAG_C, carry);
+
+            cpu_set_r16(cpu, HL_R16_ID, result);
+            cycle_count = 8;
             break;
         }
     }
