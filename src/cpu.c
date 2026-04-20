@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
@@ -33,6 +34,11 @@ static void cpu_set_flag(cpu_t *cpu, uint8_t flag, bool set)
         cpu->f |= flag;
     else
         cpu->f &= ~flag;
+}
+
+static bool cpu_get_flag(cpu_t *cpu, uint8_t flag)
+{
+    return (cpu->f & flag) != 0;
 }
 
 static inline bool half_carry_8_add(uint8_t a, uint8_t b)
@@ -451,6 +457,163 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             cpu_set_r8(cpu, bus, reg_id, imm8);
 
             cycle_count = (reg_id == HL_R8_ID) ? 12 : 8;
+            break;
+        }
+        // rlca 
+        case 0x07:
+        {
+            uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
+            uint8_t old_bit7 = (a >> 7) & 0x01;
+
+            a = (a << 1) | old_bit7;
+            cpu_set_r8(cpu, bus, A_R8_ID, a);
+
+            cpu_set_flag(cpu, FLAG_Z, false);
+            cpu_set_flag(cpu, FLAG_N, false);
+            cpu_set_flag(cpu, FLAG_H, false);
+            cpu_set_flag(cpu, FLAG_C, old_bit7);
+            
+            cycle_count = 4;
+            break;
+        }
+        // rrca
+        case 0x0F:
+        {
+            uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
+            uint8_t old_bit0 = (a & 0x01);
+
+            a = (a >> 1) | (old_bit0 << 7);
+            cpu_set_r8(cpu, bus, A_R8_ID, a);
+
+            cpu_set_flag(cpu, FLAG_Z, false);
+            cpu_set_flag(cpu, FLAG_N, false);
+            cpu_set_flag(cpu, FLAG_H, false);
+            cpu_set_flag(cpu, FLAG_C, old_bit0);
+
+            cycle_count = 4;
+            break;
+        }
+        // rla
+        case 0x17:
+        {
+            uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
+            uint8_t c = cpu_get_r8(cpu, bus, C_R8_ID);
+            uint8_t new_c = (a >> 7) & 0x01;
+
+            a = (a << 1) | (c & 0x01);
+
+            cpu_set_r8(cpu, bus, A_R8_ID, a);
+
+            cpu_set_flag(cpu, FLAG_Z, false);
+            cpu_set_flag(cpu, FLAG_N, false);
+            cpu_set_flag(cpu, FLAG_H, false);
+            cpu_set_flag(cpu, FLAG_C, new_c);
+
+            cycle_count = 4;
+            break;
+        }
+        // rra 
+        case 0x1F:
+        {
+            uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
+            uint8_t c = cpu_get_r8(cpu, bus, C_R8_ID);
+            uint8_t new_c = (a & 0x01);
+
+            a = (a >> 1) | (c << 7);
+
+            cpu_set_r8(cpu, bus, A_R8_ID, a);
+            
+            cpu_set_flag(cpu, FLAG_Z, false);
+            cpu_set_flag(cpu, FLAG_N, false);
+            cpu_set_flag(cpu, FLAG_H, false);
+            cpu_set_flag(cpu, FLAG_C, new_c);
+            
+            cycle_count = 4;
+            break;
+        }
+        // daa
+        case 0x27:
+        {
+            uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
+            uint8_t adjustment = 0;
+            bool carry = cpu_get_flag(cpu, FLAG_C);
+
+            if (cpu_get_flag(cpu, FLAG_N))
+            {
+                // previous op was subtraction
+                if (cpu_get_flag(cpu, FLAG_H))
+                {
+                    adjustment |= 0x06;
+                }
+
+                if (carry)
+                {
+                    adjustment |= 0x60;
+                }
+
+                a = (uint8_t)(a - adjustment);
+            }
+            else 
+            {
+                // previous op was addition
+                if (cpu_get_flag(cpu, FLAG_H) || ((a & 0x0F) > 0x09))
+                {
+                    adjustment |= 0x06;
+                }
+
+                if (carry || a > 0x99)
+                {
+                    adjustment |= 0x60;
+                    carry = true;
+                }
+
+                a = (uint8_t)(a + adjustment);
+            }
+
+            cpu_set_r8(cpu, bus, A_R8_ID, a);
+
+
+            cpu_set_flag(cpu, FLAG_Z, (a == 0));
+            cpu_set_flag(cpu, FLAG_H, false);
+            cpu_set_flag(cpu, FLAG_C, carry);
+            
+            cycle_count = 4;
+            break;
+        }
+        // cpl
+        case 0x2F:
+        {
+            uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
+            a = ~a;
+            cpu_set_r8(cpu, bus, A_R8_ID, a);
+
+            cpu_set_flag(cpu, FLAG_N, true);
+            cpu_set_flag(cpu, FLAG_H, true);
+
+            cycle_count = 4;
+            break;
+        }
+        // scf
+        case 0x37:
+        {
+            cpu_set_flag(cpu, FLAG_N, false);
+            cpu_set_flag(cpu, FLAG_H, false);
+            cpu_set_flag(cpu, FLAG_C, true);
+
+            cycle_count = 4;
+            break;
+        }
+        // ccf
+        case 0x3F:
+        {
+            uint8_t carry = cpu_get_flag(cpu, FLAG_C);
+            carry = (~carry & 0x01);
+
+            cpu_set_flag(cpu, FLAG_N, false);
+            cpu_set_flag(cpu, FLAG_H, false);
+            cpu_set_flag(cpu, FLAG_C, carry);
+
+            cycle_count = 4;
             break;
         }
     }

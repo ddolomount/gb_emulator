@@ -1126,6 +1126,209 @@ void test_ld_hl_mem_imm8(void)
     TEST_ASSERT_EQUAL_UINT8(0x89, cpu.l);
 }
 
+static void assert_accumulator_one_byte_common_result(cpu_t *cpu, uint8_t cycles)
+{
+    TEST_ASSERT_EQUAL_UINT8(4, cycles);
+    TEST_ASSERT_EQUAL_UINT16(0x0101, cpu->pc);
+
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu->b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu->c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu->d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu->e);
+    TEST_ASSERT_EQUAL_UINT8(0xA5, cpu->h);
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu->l);
+    TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu->sp);
+}
+
+void test_rlca(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x07);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x85;
+    cpu.f = FLAG_Z | FLAG_N | FLAG_H;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_accumulator_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0x0B, cpu.a);
+    TEST_ASSERT_EQUAL_UINT8(FLAG_C, cpu.f);
+}
+
+void test_rrca(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x0F);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x81;
+    cpu.f = FLAG_Z | FLAG_N | FLAG_H;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_accumulator_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0xC0, cpu.a);
+    TEST_ASSERT_EQUAL_UINT8(FLAG_C, cpu.f);
+}
+
+void test_rla(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x17);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x80;
+    cpu.f = FLAG_Z | FLAG_N | FLAG_H | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_accumulator_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0x01, cpu.a);
+    TEST_ASSERT_EQUAL_UINT8(FLAG_C, cpu.f);
+}
+
+void test_rra(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x1F);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x01;
+    cpu.f = FLAG_Z | FLAG_N | FLAG_H | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_accumulator_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0x80, cpu.a);
+    TEST_ASSERT_EQUAL_UINT8(FLAG_C, cpu.f);
+}
+
+void test_daa_after_addition(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x27);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x3C;
+    cpu.f = 0;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_accumulator_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0x42, cpu.a);
+    TEST_ASSERT_EQUAL_UINT8(0, cpu.f);
+}
+
+void test_daa_after_subtraction(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x27);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x0F;
+    cpu.f = FLAG_N | FLAG_H;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_accumulator_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0x09, cpu.a);
+    TEST_ASSERT_EQUAL_UINT8(FLAG_N, cpu.f);
+}
+
+void test_cpl(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x2F);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x35;
+    cpu.f = FLAG_Z | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_accumulator_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0xCA, cpu.a);
+    TEST_ASSERT_EQUAL_UINT8(FLAG_Z | FLAG_N | FLAG_H | FLAG_C, cpu.f);
+}
+
+void test_scf(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x37);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x5A;
+    cpu.f = FLAG_Z | FLAG_N | FLAG_H;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_accumulator_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu.a);
+    TEST_ASSERT_EQUAL_UINT8(FLAG_Z | FLAG_C, cpu.f);
+}
+
+void test_ccf(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_opcode_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0x3F);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x5A;
+    cpu.f = FLAG_Z | FLAG_N | FLAG_H | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_accumulator_one_byte_common_result(&cpu, cycles);
+
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu.a);
+    TEST_ASSERT_EQUAL_UINT8(FLAG_Z, cpu.f);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -1162,5 +1365,14 @@ int main(void)
     RUN_TEST(test_dec_hl_mem);
     RUN_TEST(test_ld_r8_imm8_registers);
     RUN_TEST(test_ld_hl_mem_imm8);
+    RUN_TEST(test_rlca);
+    RUN_TEST(test_rrca);
+    RUN_TEST(test_rla);
+    RUN_TEST(test_rra);
+    RUN_TEST(test_daa_after_addition);
+    RUN_TEST(test_daa_after_subtraction);
+    RUN_TEST(test_cpl);
+    RUN_TEST(test_scf);
+    RUN_TEST(test_ccf);
     return UNITY_END();
 }
