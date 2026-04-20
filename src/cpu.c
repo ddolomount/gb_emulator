@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include "../include/cpu.h"
 
@@ -296,6 +297,24 @@ static bool condition_check(cpu_t *cpu, uint8_t cond_id)
         }
     }
     return false;
+}
+
+// TODO: May be able to make this general add that handles flags
+static void cpu_add_a(cpu_t *cpu, uint8_t value, uint8_t carry_in)
+{
+    uint8_t a = cpu->a;
+    uint16_t full_result = (uint16_t)a + (uint16_t)value + (uint16_t)carry_in;
+    uint8_t result = (uint8_t)full_result;
+
+    bool half_carry = ((a & 0x0F) + (value & 0x0F) + carry_in) > 0x0F;
+    bool carry = full_result > 0xFF;
+
+    cpu->a = result;
+
+    cpu_set_flag(cpu, FLAG_Z, (result == 0));
+    cpu_set_flag(cpu, FLAG_N, false);
+    cpu_set_flag(cpu, FLAG_H, half_carry);
+    cpu_set_flag(cpu, FLAG_C, carry);
 }
 
 /* Global Functions */
@@ -681,6 +700,32 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             // TODO: Handle stop behaviour
 
             cycle_count = 4;
+            break;
+        }
+        // ld r8, r8
+        case 0x40 ... 0x7F:
+        {
+            uint8_t src = (opcode & 0x07);
+            uint8_t dest = GET_R8_ID(opcode);
+
+            uint8_t value = cpu_get_r8(cpu, bus, src);
+            cpu_set_r8(cpu, bus, dest, value);
+
+            cycle_count = (dest == HL_R8_ID || src == HL_R8_ID) ? 8 : 4;
+            break;
+        }
+        // add a, r8
+        case 0x80 ... 0x8F:
+        {
+            uint8_t reg_id = (opcode & 0x07);
+            uint8_t carry_cond = (opcode >> 3) & 0x01;
+            uint8_t value = cpu_get_r8(cpu, bus, reg_id);
+
+            uint8_t carry_in = carry_cond ? cpu_get_flag(cpu, FLAG_C) : 0;
+
+            cpu_add_a(cpu, value, carry_in);
+
+            cycle_count = (reg_id == HL_R8_ID) ? 8 : 4;
             break;
         }
     }
