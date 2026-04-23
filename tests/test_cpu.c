@@ -1597,6 +1597,24 @@ static void assert_alu_a_common_result(cpu_t *cpu,
     TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu->sp);
 }
 
+static void assert_alu_a_imm8_common_result(cpu_t *cpu,
+                                            uint8_t cycles,
+                                            uint8_t expected_a,
+                                            uint8_t expected_f)
+{
+    TEST_ASSERT_EQUAL_UINT8(8, cycles);
+    TEST_ASSERT_EQUAL_UINT16(0x0102, cpu->pc);
+    TEST_ASSERT_EQUAL_UINT8(expected_a, cpu->a);
+    TEST_ASSERT_EQUAL_UINT8(expected_f, cpu->f);
+    TEST_ASSERT_EQUAL_UINT8(0xB1, cpu->b);
+    TEST_ASSERT_EQUAL_UINT8(0xC1, cpu->c);
+    TEST_ASSERT_EQUAL_UINT8(0xD1, cpu->d);
+    TEST_ASSERT_EQUAL_UINT8(0xE1, cpu->e);
+    TEST_ASSERT_EQUAL_UINT8(0xA5, cpu->h);
+    TEST_ASSERT_EQUAL_UINT8(0x5A, cpu->l);
+    TEST_ASSERT_EQUAL_UINT16(0xDFFE, cpu->sp);
+}
+
 void test_add_a_r8(void)
 {
     uint8_t rom[0x200] = {0};
@@ -1757,6 +1775,150 @@ void test_cp_a_r8(void)
     TEST_ASSERT_EQUAL_UINT8(0x01, cpu.b);
 }
 
+void test_add_a_imm8(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0xC6, 0x91, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x8F;
+    cpu.f = FLAG_Z | FLAG_N;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_alu_a_imm8_common_result(&cpu, cycles, 0x20, FLAG_H | FLAG_C);
+}
+
+void test_adc_a_imm8(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0xCE, 0x71, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x8E;
+    cpu.f = FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_alu_a_imm8_common_result(&cpu, cycles, 0x00, FLAG_Z | FLAG_H | FLAG_C);
+}
+
+void test_sub_a_imm8(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0xD6, 0x01, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x10;
+    cpu.f = FLAG_Z | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_alu_a_imm8_common_result(&cpu, cycles, 0x0F, FLAG_N | FLAG_H);
+}
+
+void test_sbc_a_imm8(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0xDE, 0x0F, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x10;
+    cpu.f = FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_alu_a_imm8_common_result(&cpu, cycles, 0x00, FLAG_Z | FLAG_N | FLAG_H);
+}
+
+void test_and_a_imm8(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0xE6, 0x0F, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0xF0;
+    cpu.f = FLAG_N | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_alu_a_imm8_common_result(&cpu, cycles, 0x00, FLAG_Z | FLAG_H);
+}
+
+void test_xor_a_imm8(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0xEE, 0x5A, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x5A;
+    cpu.f = FLAG_N | FLAG_H | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_alu_a_imm8_common_result(&cpu, cycles, 0x00, FLAG_Z);
+}
+
+void test_or_a_imm8(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0xF6, 0x0A, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x50;
+    cpu.f = FLAG_Z | FLAG_N | FLAG_H | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_alu_a_imm8_common_result(&cpu, cycles, 0x5A, 0);
+}
+
+void test_cp_a_imm8(void)
+{
+    uint8_t rom[0x200] = {0};
+    Memory_t memory;
+    Cartridge_t cartridge;
+    bus_t bus;
+
+    setup_instruction_test(rom, sizeof(rom), &memory, &cartridge, &bus, 0xFE, 0x01, 0x00);
+
+    cpu_t cpu = test_cpu_with_sentinel_registers();
+    cpu.a = 0x10;
+    cpu.f = FLAG_Z | FLAG_C;
+
+    uint8_t cycles = cpu_step(&cpu, &bus);
+
+    assert_alu_a_imm8_common_result(&cpu, cycles, 0x10, FLAG_N | FLAG_H);
+}
+
 void test_alu_a_hl_mem_operands(void)
 {
     const struct {
@@ -1871,6 +2033,14 @@ int main(void)
     RUN_TEST(test_xor_a_r8);
     RUN_TEST(test_or_a_r8);
     RUN_TEST(test_cp_a_r8);
+    RUN_TEST(test_add_a_imm8);
+    RUN_TEST(test_adc_a_imm8);
+    RUN_TEST(test_sub_a_imm8);
+    RUN_TEST(test_sbc_a_imm8);
+    RUN_TEST(test_and_a_imm8);
+    RUN_TEST(test_xor_a_imm8);
+    RUN_TEST(test_or_a_imm8);
+    RUN_TEST(test_cp_a_imm8);
     RUN_TEST(test_alu_a_hl_mem_operands);
     return UNITY_END();
 }

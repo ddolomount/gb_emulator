@@ -336,6 +336,60 @@ static void cpu_sub_a(cpu_t *cpu, uint8_t value, uint8_t carry_in)
     cpu_set_flag(cpu, FLAG_C, borrow);
 }
 
+static void cpu_alu_a(cpu_t *cpu, uint8_t op_id, uint8_t value)
+{
+    switch (op_id)
+    {
+        case 0: // ADD
+            cpu_add_a(cpu, value, 0);
+            break;
+
+        case 1: // ADC
+            cpu_add_a(cpu, value, cpu_get_flag(cpu, FLAG_C) ? 1 : 0);
+            break;
+
+        case 2: // SUB
+            cpu_sub_a(cpu, value, 0);
+            break;
+
+        case 3: // SBC
+            cpu_sub_a(cpu, value, cpu_get_flag(cpu, FLAG_C) ? 1 : 0);
+            break;
+
+        case 4: // AND
+            cpu->a &= value;
+            cpu_set_flag(cpu, FLAG_Z, cpu->a == 0);
+            cpu_set_flag(cpu, FLAG_N, false);
+            cpu_set_flag(cpu, FLAG_H, true);
+            cpu_set_flag(cpu, FLAG_C, false);
+            break;
+
+        case 5: // XOR
+            cpu->a ^= value;
+            cpu_set_flag(cpu, FLAG_Z, cpu->a == 0);
+            cpu_set_flag(cpu, FLAG_N, false);
+            cpu_set_flag(cpu, FLAG_H, false);
+            cpu_set_flag(cpu, FLAG_C, false);
+            break;
+
+        case 6: // OR
+            cpu->a |= value;
+            cpu_set_flag(cpu, FLAG_Z, cpu->a == 0);
+            cpu_set_flag(cpu, FLAG_N, false);
+            cpu_set_flag(cpu, FLAG_H, false);
+            cpu_set_flag(cpu, FLAG_C, false);
+            break;
+
+        case 7: // CP
+        {
+            uint8_t old_a = cpu->a;
+            cpu_sub_a(cpu, value, 0);
+            cpu->a = old_a;
+            break;
+        }
+    }
+}
+
 /* Global Functions */
 
 void cpu_init(cpu_t *cpu)
@@ -733,103 +787,34 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             cycle_count = (dest == HL_R8_ID || src == HL_R8_ID) ? 8 : 4;
             break;
         }
-        // add a, r8 + adc a, r8
-        case 0x80 ... 0x8F:
+        // 8-bit arithmetic operations
+        case 0x80 ... 0xBF:
         {
             uint8_t reg_id = (opcode & 0x07);
-            uint8_t carry_cond = (opcode >> 3) & 0x01;
+            uint8_t op_id = (opcode >> 3) & 0x07;
             uint8_t value = cpu_get_r8(cpu, bus, reg_id);
 
-            uint8_t carry_in = carry_cond ? cpu_get_flag(cpu, FLAG_C) : 0;
-
-            cpu_add_a(cpu, value, carry_in);
+            cpu_alu_a(cpu, op_id, value);
 
             cycle_count = (reg_id == HL_R8_ID) ? 8 : 4;
             break;
         }
-        // sub a, r8 + sbc a, r8
-        case 0x90 ... 0x9F:
+        // 8-bit arithmetic with immediate
+        case 0xC6:
+        case 0xCE:
+        case 0xDE:
+        case 0xD6:
+        case 0xE6:
+        case 0xEE:
+        case 0xF6:
+        case 0xFE:
         {
-            uint8_t reg_id = (opcode & 0x07);
-            uint8_t carry_cond = (opcode >> 3) & 0x01;
-            uint8_t value = cpu_get_r8(cpu, bus, reg_id);
+            uint8_t op_id = (opcode >> 3) & 0x07;
+            uint8_t value = bus_read8(bus, cpu->pc++);
 
-            uint8_t carry_in = carry_cond ? cpu_get_flag(cpu, FLAG_C) : 0;
+            cpu_alu_a(cpu, op_id, value);
 
-            cpu_sub_a(cpu, value, carry_in);
-
-            cycle_count = (reg_id == HL_R8_ID) ? 8 : 4;
-            break;
-        }
-        // and a, r8
-        case 0xA0 ... 0xA7:
-        {
-            uint8_t reg_id = (opcode & 0x07);
-            uint8_t value = cpu_get_r8(cpu, bus, reg_id);
-            uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
-
-            a &= value;
-
-            cpu_set_r8(cpu, bus, A_R8_ID, a);
-
-            cpu_set_flag(cpu, FLAG_Z, (a == 0));
-            cpu_set_flag(cpu, FLAG_N, false);
-            cpu_set_flag(cpu, FLAG_H, true);
-            cpu_set_flag(cpu, FLAG_C, false);
-
-            cycle_count = (reg_id == HL_R8_ID) ? 8 : 4;
-            break;
-        }
-        // xor a, r8
-        case 0xA8 ... 0xAF:
-        {
-            uint8_t reg_id = (opcode & 0x07);
-            uint8_t value = cpu_get_r8(cpu, bus, reg_id);
-            uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
-
-            a ^= value;
-
-            cpu_set_r8(cpu, bus, A_R8_ID, a);
-
-            cpu_set_flag(cpu, FLAG_Z, (a == 0));
-            cpu_set_flag(cpu, FLAG_N, false);
-            cpu_set_flag(cpu, FLAG_H, false);
-            cpu_set_flag(cpu, FLAG_C, false);
-
-            cycle_count = (reg_id == HL_R8_ID) ? 8 : 4;
-            break;
-        }
-        // or a, r8
-        case 0xB0 ... 0xB7:
-        {
-            uint8_t reg_id = (opcode & 0x07);
-            uint8_t value = cpu_get_r8(cpu, bus, reg_id);
-            uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
-
-            a |= value;
-
-            cpu_set_r8(cpu, bus, A_R8_ID, a);
-
-            cpu_set_flag(cpu, FLAG_Z, (a == 0));
-            cpu_set_flag(cpu, FLAG_N, false);
-            cpu_set_flag(cpu, FLAG_H, false);
-            cpu_set_flag(cpu, FLAG_C, false);
-           
-            cycle_count = (reg_id == HL_R8_ID) ? 8 : 4;
-            break;
-        }
-        // cp a, r8
-        case 0xB8 ... 0xBF:
-        {
-            uint8_t reg_id = (opcode & 0x07);
-            uint8_t value = cpu_get_r8(cpu, bus, reg_id);
-            uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
-
-            cpu_sub_a(cpu, value, 0);
-
-            cpu->a = a;
-
-            cycle_count = (reg_id == HL_R8_ID) ? 8 : 4;
+            cycle_count = 8;
             break;
         }
     }
@@ -837,7 +822,6 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
     // Return number of cycles required for instruction
     return cycle_count;
 }
-
 
 
 
