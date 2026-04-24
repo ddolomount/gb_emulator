@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../include/cpu.h"
@@ -6,7 +7,8 @@
 #define BC_R16_ID 0
 #define DE_R16_ID 1
 #define HL_R16_ID 2
-#define SP_R16_ID 3 
+#define SP_R16_ID 3
+#define AF_R16_ID 3
 
 #define B_R8_ID  0
 #define C_R8_ID  1
@@ -120,6 +122,37 @@ static void cpu_set_r16(cpu_t *cpu, uint8_t reg_id, uint16_t value)
     }
 }
 
+static void cpu_set_r16stk(cpu_t *cpu, uint8_t reg_id, uint16_t value)
+{
+    switch (reg_id) 
+    {
+        case BC_R16_ID:
+        {
+            cpu->b = (value >> 8) & 0xFF;
+            cpu->c = value & 0xFF;
+            break;
+        }
+        case DE_R16_ID:
+        {
+            cpu->d = (value >> 8) & 0xFF;
+            cpu->e = value & 0xFF;
+            break;
+        }
+        case HL_R16_ID:
+        {
+            cpu->h = (value >> 8) & 0xFF;
+            cpu->l = value & 0xFF;
+            break;
+        }
+        case AF_R16_ID:
+        {
+            cpu->a = (value >> 8) & 0xFF;
+            cpu->f = value & 0xF0; // Only uses upper nibble
+            break;
+        }
+    }
+}
+
 static void cpu_set_r8(cpu_t *cpu, bus_t *bus, uint8_t reg_id, uint8_t value)
 {
     switch (reg_id)
@@ -170,6 +203,16 @@ static void cpu_set_r8(cpu_t *cpu, bus_t *bus, uint8_t reg_id, uint8_t value)
 
 }
 
+static void cpu_ld_addr_a(cpu_t *cpu, bus_t *bus, uint16_t addr)
+{
+    bus_write8(bus, addr, cpu->a);
+}
+
+static void cpu_ld_a_addr(cpu_t *cpu, bus_t *bus, uint16_t addr)
+{
+    cpu->a = bus_read8(bus, addr);
+}
+
 static uint16_t cpu_get_r16(cpu_t *cpu, uint8_t reg_id)
 {
     switch (reg_id)
@@ -189,6 +232,33 @@ static uint16_t cpu_get_r16(cpu_t *cpu, uint8_t reg_id)
         case 3:
         {
             return cpu->sp; // SP
+        }
+        default:
+        {
+            return 0;
+        }
+    }
+}
+
+static uint16_t cpu_get_r16stk(cpu_t *cpu, uint8_t reg_id)
+{
+    switch (reg_id)
+    {
+        case BC_R16_ID:
+        {
+            return ((uint16_t)cpu->b << 8) | cpu->c; // BC
+        }
+        case DE_R16_ID:
+        {
+            return ((uint16_t)cpu->d << 8) | cpu->e; // DE
+        }
+        case HL_R16_ID:
+        {
+            return ((uint16_t)cpu->h << 8) | cpu->l; // HL
+        }
+        case AF_R16_ID:
+        {
+            return ((uint16_t)cpu->a << 8) | cpu->f; // AF
         }
         default:
         {
@@ -273,6 +343,18 @@ static uint8_t cpu_get_r8(cpu_t *cpu, bus_t *bus, uint8_t reg_id)
             return 0xFF;
         }    
     }
+}
+
+static uint8_t cpu_fetch8(cpu_t *cpu, bus_t *bus)
+{
+    return bus_read8(bus, cpu->pc++);
+}
+
+static uint16_t cpu_fetch16(cpu_t *cpu, bus_t *bus)
+{
+    uint16_t value = bus_read16(bus, cpu->pc);
+    cpu->pc += 2;
+    return value;
 }
 
 static bool condition_check(cpu_t *cpu, uint8_t cond_id)
@@ -388,6 +470,23 @@ static void cpu_alu_a(cpu_t *cpu, uint8_t op_id, uint8_t value)
             break;
         }
     }
+}
+
+static uint16_t cpu_add_sp_offset(cpu_t *cpu, int8_t offset)
+{
+    uint16_t sp = cpu->sp;
+    uint8_t uoffset = (uint8_t)offset;
+    uint16_t result = (uint16_t)(sp + offset);
+
+    bool half_carry = ((sp & 0x0F) + (uoffset & 0x0F)) > 0x0F;
+    bool carry = ((sp & 0xFF) + uoffset) > 0xFF;
+
+    cpu_set_flag(cpu, FLAG_Z, false);
+    cpu_set_flag(cpu, FLAG_N, false);
+    cpu_set_flag(cpu, FLAG_H, half_carry);
+    cpu_set_flag(cpu, FLAG_C, carry);
+
+    return result;
 }
 
 static void cpu_push16(cpu_t *cpu, bus_t *bus, uint16_t value)
@@ -948,6 +1047,143 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             cycle_count = 8;
             break;
         }
+        // pop r16stk
+        case 0xC1:
+        case 0xD1:
+        case 0xE1:
+        case 0xF1:
+        {
+            uint8_t reg_id = (opcode >> 4) & 0x03;
+
+            uint16_t value = cpu_pop16(cpu, bus);
+
+            cpu_set_r16stk(cpu, reg_id, value);
+
+            cycle_count = 12;
+            break;
+        }
+        // push r16stk
+        case 0xC5:
+        case 0xD5:
+        case 0xE5:
+        case 0xF5:
+        {
+            uint16_t reg_id = (opcode >> 4) & 0x03;
+            uint16_t value = cpu_get_r16stk(cpu, reg_id);
+
+            cpu_push16(cpu, bus, value);
+
+            cycle_count = 16;
+            break;
+        }
+        // ldh [c], a
+        case 0xE2:
+        {
+            uint8_t c = cpu_get_r8(cpu, bus, C_R8_ID);
+            uint16_t addr = 0xFF00 + c;
+            
+            cpu_ld_addr_a(cpu, bus, addr);
+            
+            cycle_count = 8;
+            break;
+        }
+        // ldh [imm8], a
+        case 0xE0:
+        {
+            uint8_t imm8 = cpu_fetch8(cpu, bus);
+            uint16_t addr = 0xFF00 + imm8;
+
+            cpu_ld_addr_a(cpu, bus, addr);
+
+            cycle_count = 12;
+            break;
+        }
+        // ld [imm16], a
+        case 0xEA:
+        {
+            uint16_t imm16 = cpu_fetch16(cpu, bus);
+
+            cpu_ld_addr_a(cpu, bus, imm16);
+
+            cycle_count = 16;
+            break;
+        }
+        // ldh a, [c]
+        case 0xF2:
+        {
+            uint8_t c = cpu_get_r8(cpu, bus, C_R8_ID);
+            uint16_t addr = 0xFF00 + c;
+
+            cpu_ld_a_addr(cpu, bus, addr);
+
+            cycle_count = 8;
+            break;
+        }
+        // ldh a, [imm8]
+        case 0xF0:
+        {
+            uint8_t imm8 = cpu_fetch8(cpu, bus);
+            uint16_t addr = 0xFF00 + imm8;
+
+            cpu_ld_a_addr(cpu, bus, addr);
+
+            cycle_count = 12;
+            break;
+        }
+        // ld a, [imm16]
+        case 0xFA:
+        {
+            uint16_t imm16 = cpu_fetch16(cpu, bus);
+
+            cpu_ld_a_addr(cpu, bus, imm16);
+
+            cycle_count = 16;
+            break;
+        }
+        // add sp, imm8
+        case 0xE8:
+        {
+            int8_t imm8 = cpu_fetch8(cpu, bus);
+            cpu->sp = cpu_add_sp_offset(cpu, imm8);
+
+            cycle_count = 16;
+            break;
+        }
+        // ld hl, sp + imm8
+        case 0xF8:
+        {
+            int8_t imm8 = cpu_fetch8(cpu, bus);
+            uint16_t result = cpu_add_sp_offset(cpu, imm8);
+
+            cpu_set_r16(cpu, HL_R16_ID, result);
+
+            cycle_count = 12;
+            break;
+        }
+        // ld sp, hl
+        case 0xF9:
+        {
+            uint16_t hl = cpu_get_r16(cpu, HL_R16_ID);
+            cpu_set_r16(cpu, SP_R16_ID, hl);
+
+            cycle_count = 8;
+            break;
+        }
+        // di
+        case 0xF3:
+        {
+            cpu->ime = false;
+            cycle_count = 4;
+            break;
+        }
+        // ei
+        case 0xFB:
+        {
+            cpu->ime = true;
+            cycle_count = 4;
+            break;
+        }
+
     }
 
     // Return number of cycles required for instruction
