@@ -20,6 +20,7 @@ typedef struct {
     uint8_t h, l; 
     uint16_t sp;  // Stack Pointer
     uint16_t pc;  // Program Counter/Pointer
+    bool ime;     // Interrupt Master Enable
 } cpu_t;
 
 /*

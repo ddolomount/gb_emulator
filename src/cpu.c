@@ -390,6 +390,19 @@ static void cpu_alu_a(cpu_t *cpu, uint8_t op_id, uint8_t value)
     }
 }
 
+static void cpu_push16(cpu_t *cpu, bus_t *bus, uint16_t value)
+{
+    cpu->sp -= 2;
+    bus_write16(bus, cpu->sp, value);
+}
+
+static uint16_t cpu_pop16(cpu_t *cpu, bus_t *bus)
+{
+    uint16_t value = bus_read16(bus, cpu->sp);
+    cpu->sp += 2;
+    return value;
+}
+
 /* Global Functions */
 
 void cpu_init(cpu_t *cpu)
@@ -764,6 +777,124 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             }
             break;
         }
+        // ret cond
+        case 0xC0:
+        case 0xC8:
+        case 0xD0:
+        case 0xD8:
+        {
+            uint8_t cond_id = GET_COND_ID(opcode);
+
+            if (condition_check(cpu, cond_id))
+            {
+                cpu->pc = cpu_pop16(cpu, bus);
+                cycle_count = 20;
+            }
+            else
+            {
+                cycle_count = 8;
+            }
+            break;
+        }
+        // ret
+        case 0xC9:
+        {
+            cpu->pc = cpu_pop16(cpu, bus);
+            cycle_count = 16;
+            break;
+        }
+        // reti
+        case 0xD9:
+        {
+            cpu->pc = cpu_pop16(cpu, bus);
+            cpu->ime = true;
+            cycle_count = 16;
+            break;
+        }
+        // jp cond, imm16
+        case 0xC2:
+        case 0xCA:
+        case 0xD2:
+        case 0xDA:
+        {
+            uint8_t cond_id = GET_COND_ID(opcode);
+            uint16_t target = bus_read16(bus, cpu->pc);
+            cpu->pc += 2;
+
+            if (condition_check(cpu, cond_id))
+            {
+                cpu->pc = target;
+                cycle_count = 16;
+            }
+            else
+            {
+                cycle_count = 12;
+            }
+            break;
+        }
+        // jp imm16
+        case 0xC3:
+        {
+            uint16_t target = bus_read16(bus, cpu->pc);
+            cpu->pc = target;
+            cycle_count = 16;
+            break;
+        }
+        // jp hl
+        case 0xE9:
+        {
+            cpu->pc = cpu_get_r16(cpu, HL_R16_ID);
+            cycle_count = 4;
+            break;
+        }
+        // call cond, imm16
+        case 0xC4:
+        case 0xCC:
+        case 0xD4:
+        case 0xDC:
+        {
+            uint8_t cond_id = GET_COND_ID(opcode);
+            uint16_t target = bus_read16(bus, cpu->pc);
+            cpu->pc += 2;
+
+            if (condition_check(cpu, cond_id))
+            {
+                cpu_push16(cpu, bus, cpu->pc);
+                cpu->pc = target;
+                cycle_count = 24;
+            }
+            else
+            {
+                cycle_count = 12;
+            }
+            break;
+        }
+        // call imm16
+        case 0xCD:
+        {
+            uint16_t target = bus_read16(bus, cpu->pc);
+            cpu->pc += 2;
+            cpu_push16(cpu, bus, cpu->pc);
+            cpu->pc = target;
+            cycle_count = 24;
+            break;
+        }
+        // rst tgt3
+        case 0xC7:
+        case 0xCF:
+        case 0xD7:
+        case 0xDF:
+        case 0xE7:
+        case 0xEF:
+        case 0xF7:
+        case 0xFF:
+        {
+            uint16_t target = opcode & 0x38;
+            cpu_push16(cpu, bus, cpu->pc);
+            cpu->pc = target;
+            cycle_count = 16;
+            break;
+        }
         // stop
         case 0x10:
         {
@@ -822,6 +953,5 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
     // Return number of cycles required for instruction
     return cycle_count;
 }
-
 
 
