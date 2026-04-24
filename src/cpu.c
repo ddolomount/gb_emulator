@@ -489,6 +489,89 @@ static uint16_t cpu_add_sp_offset(cpu_t *cpu, int8_t offset)
     return result;
 }
 
+static uint8_t cpu_execute_cb(cpu_t *cpu, bus_t *bus)
+{
+    uint8_t opcode = cpu_fetch8(cpu, bus);
+    uint8_t reg_id = opcode & 0x07;
+    uint8_t bit_index = (opcode >> 3) & 0x07;
+    uint8_t value = cpu_get_r8(cpu, bus, reg_id);
+    uint8_t result = value;
+    uint8_t carry = 0;
+
+    if (opcode < 0x40)
+    {
+        switch (bit_index)
+        {
+            case 0: // rlc
+                carry = (value >> 7) & 0x01;
+                result = (uint8_t)((value << 1) | carry);
+                break;
+            case 1: // rrc
+                carry = value & 0x01;
+                result = (uint8_t)((value >> 1) | (carry << 7));
+                break;
+            case 2: // rl
+            {
+                uint8_t old_carry = cpu_get_flag(cpu, FLAG_C) ? 1 : 0;
+                carry = (value >> 7) & 0x01;
+                result = (uint8_t)((value << 1) | old_carry);
+                break;
+            }
+            case 3: // rr
+            {
+                uint8_t old_carry = cpu_get_flag(cpu, FLAG_C) ? 1 : 0;
+                carry = value & 0x01;
+                result = (uint8_t)((value >> 1) | (old_carry << 7));
+                break;
+            }
+            case 4: // sla
+                carry = (value >> 7) & 0x01;
+                result = (uint8_t)(value << 1);
+                break;
+            case 5: // sra
+                carry = value & 0x01;
+                result = (uint8_t)((value >> 1) | (value & 0x80));
+                break;
+            case 6: // swap
+                result = (uint8_t)((value << 4) | (value >> 4));
+                carry = 0;
+                break;
+            case 7: // srl
+                carry = value & 0x01;
+                result = (uint8_t)(value >> 1);
+                break;
+        }
+
+        cpu_set_r8(cpu, bus, reg_id, result);
+        cpu_set_flag(cpu, FLAG_Z, result == 0);
+        cpu_set_flag(cpu, FLAG_N, false);
+        cpu_set_flag(cpu, FLAG_H, false);
+        cpu_set_flag(cpu, FLAG_C, carry != 0);
+
+        return (reg_id == HL_R8_ID) ? 16 : 8;
+    }
+
+    if (opcode < 0x80)
+    {
+        cpu_set_flag(cpu, FLAG_Z, (value & (1u << bit_index)) == 0);
+        cpu_set_flag(cpu, FLAG_N, false);
+        cpu_set_flag(cpu, FLAG_H, true);
+
+        return (reg_id == HL_R8_ID) ? 12 : 8;
+    }
+
+    if (opcode < 0xC0)
+    {
+        result = (uint8_t)(value & ~(1u << bit_index));
+        cpu_set_r8(cpu, bus, reg_id, result);
+        return (reg_id == HL_R8_ID) ? 16 : 8;
+    }
+
+    result = (uint8_t)(value | (1u << bit_index));
+    cpu_set_r8(cpu, bus, reg_id, result);
+    return (reg_id == HL_R8_ID) ? 16 : 8;
+}
+
 static void cpu_push16(cpu_t *cpu, bus_t *bus, uint16_t value)
 {
     cpu->sp -= 2;
@@ -876,6 +959,12 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             }
             break;
         }
+        // cb prefix
+        case 0xCB:
+        {
+            cycle_count = cpu_execute_cb(cpu, bus);
+            break;
+        }
         // ret cond
         case 0xC0:
         case 0xC8:
@@ -1189,5 +1278,4 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
     // Return number of cycles required for instruction
     return cycle_count;
 }
-
 
