@@ -811,7 +811,8 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
         case 0x17:
         {
             uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
-            uint8_t c = cpu_get_r8(cpu, bus, C_R8_ID);
+            uint8_t c = cpu_get_flag(cpu, FLAG_C);
+
             uint8_t new_c = (a >> 7) & 0x01;
 
             a = (a << 1) | (c & 0x01);
@@ -830,7 +831,7 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
         case 0x1F:
         {
             uint8_t a = cpu_get_r8(cpu, bus, A_R8_ID);
-            uint8_t c = cpu_get_r8(cpu, bus, C_R8_ID);
+            uint8_t c = cpu_get_flag(cpu, FLAG_C);
             uint8_t new_c = (a & 0x01);
 
             a = (a >> 1) | (c << 7);

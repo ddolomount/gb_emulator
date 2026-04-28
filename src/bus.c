@@ -38,6 +38,12 @@ uint8_t bus_read8(bus_t *bus, uint16_t addr)
         return bus->memory->OAM[addr - OAM_START_ADDR];
     }
 
+    // Read from IO registers
+    if (addr >= IO_START_ADDR && addr <= IO_END_ADDR)
+    {
+        return bus->memory->IO[addr - IO_START_ADDR];
+    }
+
     // Read from HRAM
     if (addr >= HRAM_START_ADDR && addr <= HRAM_END_ADDR)
     {
@@ -84,6 +90,12 @@ void bus_write8(bus_t *bus, uint16_t addr, uint8_t value)
         bus->memory->OAM[addr - OAM_START_ADDR] = value;
     }
 
+    // Write to IO registers
+    if (addr >= IO_START_ADDR && addr <= IO_END_ADDR)
+    {
+        bus->memory->IO[addr - IO_START_ADDR] = value;
+    }
+
     // Write to HRAM
     if (addr >= HRAM_START_ADDR && addr <= HRAM_END_ADDR)
     {
@@ -105,4 +117,3 @@ void bus_write16(bus_t *bus, uint16_t addr, uint16_t value)
     addr++;
     bus_write8(bus, addr, high_byte);
 }
-

@@ -13,6 +13,7 @@ DEPS := $(OBJS:.o=.d)
 APP_SRCS := $(filter-out $(SRC_DIR)/main.c,$(SRCS))
 TEST_SRCS := $(shell find $(TEST_DIR) -maxdepth 1 -name 'test_*.c')
 TEST_BINS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/tests/%,$(TEST_SRCS))
+BLARGG_TEST_BIN := $(BUILD_DIR)/tests/test_blargg
 
 CPPFLAGS := -I$(INC_DIR)
 TEST_CPPFLAGS := $(CPPFLAGS) -I$(UNITY_DIR)
@@ -20,7 +21,7 @@ CFLAGS := -std=c11 -Wall -Wextra -g
 LDFLAGS :=
 LDLIBS :=
 
-.PHONY: all clean rebuild test check-unity
+.PHONY: all clean rebuild test test-roms check-unity
 
 all: $(TARGET)
 
@@ -29,6 +30,9 @@ $(TARGET): $(OBJS)
 
 test: check-unity $(TEST_BINS)
 	@for test_bin in $(TEST_BINS); do ./$$test_bin || exit 1; done
+
+test-roms: check-unity $(BLARGG_TEST_BIN)
+	@./$(BLARGG_TEST_BIN)
 
 check-unity:
 	@test -f $(UNITY_DIR)/unity_internals.h || { \
