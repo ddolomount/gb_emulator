@@ -5,6 +5,7 @@ SRC_DIR := src
 INC_DIR := include
 TEST_DIR := tests
 UNITY_DIR := $(TEST_DIR)/unity
+ROMS_DIR := $(TEST_DIR)/roms
 
 SRCS := $(shell find $(SRC_DIR) -name '*.c')
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
@@ -31,8 +32,8 @@ $(TARGET): $(OBJS)
 test: check-unity $(TEST_BINS)
 	@for test_bin in $(TEST_BINS); do ./$$test_bin || exit 1; done
 
-test-roms: check-unity $(BLARGG_TEST_BIN)
-	@./$(BLARGG_TEST_BIN)
+test-roms: check-unity $(ROMS_DIR)/.git $(BLARGG_TEST_BIN)
+	@BLARGG_ROM_DIR=$(ROMS_DIR) ./$(BLARGG_TEST_BIN)
 
 check-unity:
 	@test -f $(UNITY_DIR)/unity_internals.h || { \
