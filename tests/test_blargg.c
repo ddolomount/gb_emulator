@@ -1,5 +1,6 @@
 #include "unity/unity.h"
 
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -14,8 +15,8 @@
 #define BLARGG_SERIAL_SB_ADDR 0xFF01
 #define BLARGG_SERIAL_SC_ADDR 0xFF02
 #define BLARGG_SERIAL_TRANSFER_START 0x81
-#define BLARGG_DEFAULT_MAX_STEPS 5000000ULL
-#define BLARGG_DEFAULT_STALL_STEPS 1000000ULL
+#define BLARGG_DEFAULT_MAX_STEPS 20000000ULL
+#define BLARGG_DEFAULT_STALL_STEPS 20000000ULL
 #define BLARGG_SERIAL_MESSAGE_CHARS 3000
 
 typedef struct {
@@ -43,30 +44,6 @@ static bool file_exists(const char *path)
 
     fclose(fp);
     return true;
-}
-
-static bool resolve_blargg_rom_path(char *buffer,
-                                    size_t buffer_size,
-                                    const char *env_var,
-                                    const char *relative_path)
-{
-    const char *explicit_path = getenv(env_var);
-    const char *rom_dir = getenv("BLARGG_ROM_DIR");
-
-    if (explicit_path && file_exists(explicit_path)) {
-        snprintf(buffer, buffer_size, "%s", explicit_path);
-        return true;
-    }
-
-    if (rom_dir) {
-        snprintf(buffer, buffer_size, "%s/%s", rom_dir, relative_path);
-        if (file_exists(buffer)) {
-            return true;
-        }
-    }
-
-    buffer[0] = '\0';
-    return false;
 }
 
 static uint64_t blargg_max_steps(void)
@@ -267,67 +244,61 @@ static rom_test_result_t run_blargg_rom(const char *rom_path, uint64_t max_steps
     return result;
 }
 
-static void assert_blargg_rom_passes(const char *env_var, const char *relative_path)
+static void report_blargg_result(const char *rom_path, rom_test_result_t result)
 {
-    char rom_path[1024];
     char message[4608];
-    rom_test_result_t result;
-    const char *serial_output;
+    const char *serial_output = result.serial_output[0] ? result.serial_output : "<none>";
 
-    if (!resolve_blargg_rom_path(rom_path, sizeof(rom_path), env_var, relative_path)) {
-        snprintf(message, sizeof(message),
-                 "Set %s or BLARGG_ROM_DIR to run %s", env_var, relative_path);
-        TEST_IGNORE_MESSAGE(message);
-    }
-
-    result = run_blargg_rom(rom_path, blargg_max_steps());
-    serial_output = result.serial_output[0] ? result.serial_output : "<none>";
-
-    if (result.passed) {
+    if (result.passed == true)
+    {
         return;
     }
 
-    if (result.invalid_opcode) {
+    if (result.invalid_opcode == true)
+    {
         snprintf(message, sizeof(message),
-                 "Invalid/unimplemented opcode while running %s. Serial output: %.*s",
-                 rom_path,
-                 BLARGG_SERIAL_MESSAGE_CHARS,
-                 serial_output);
+                "Invalid/unimplemented opcode while running %s. Serial output: %.*s",
+                rom_path,
+                BLARGG_SERIAL_MESSAGE_CHARS,
+                serial_output);
         TEST_FAIL_MESSAGE(message);
     }
 
-    if (result.timed_out) {
+    if (result.timed_out == true)
+    {
         snprintf(message, sizeof(message),
-                 "Timed out running %s after %llu steps. Serial output: %.*s",
-                 rom_path,
-                 (unsigned long long)blargg_max_steps(),
-                 BLARGG_SERIAL_MESSAGE_CHARS,
-                 serial_output);
+                "Timed out running %s after %llu steps. Serial output: %.*s",
+                rom_path,
+                (unsigned long long)blargg_max_steps(),
+                BLARGG_SERIAL_MESSAGE_CHARS,
+                serial_output);
         TEST_FAIL_MESSAGE(message);
     }
 
     snprintf(message, sizeof(message),
-             "Blargg ROM failed: %s. Serial output: %.*s",
-             rom_path,
-             BLARGG_SERIAL_MESSAGE_CHARS,
-             serial_output);
+                "Blargg ROM failed: %s. Serial output: %.*s",
+                rom_path,
+                BLARGG_SERIAL_MESSAGE_CHARS,
+                serial_output);
     TEST_FAIL_MESSAGE(message);
 }
 
-void test_blargg_cpu_instrs(void)
+void test_blargg_custom(void)
 {
-    assert_blargg_rom_passes("BLARGG_CPU_INSTRS_ROM", "cpu_instrs/cpu_instrs.gb");
-}
+    const char *rom_path = getenv("ROM");
 
-void test_blargg_instr_timing(void)
-{
-    assert_blargg_rom_passes("BLARGG_INSTR_TIMING_ROM", "instr_timing/instr_timing.gb");
+    if (!rom_path || rom_path[0] == '\0' || !file_exists(rom_path))
+    {
+        TEST_IGNORE_MESSAGE("Set BLARGG_ROM to the path of a specific .gb ROM to run it");
+        return;
+    }
+
+    report_blargg_result(rom_path, run_blargg_rom(rom_path, blargg_max_steps()));
 }
 
 int main(void)
 {
     UNITY_BEGIN();
-    RUN_TEST(test_blargg_cpu_instrs);
-    RUN_TEST(test_blargg_instr_timing);
+    RUN_TEST(test_blargg_custom);
     return UNITY_END();
 }

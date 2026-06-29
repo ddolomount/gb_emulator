@@ -22,7 +22,7 @@ CFLAGS := -std=c11 -Wall -Wextra -g
 LDFLAGS :=
 LDLIBS :=
 
-.PHONY: all clean rebuild test test-roms check-unity
+.PHONY: all clean rebuild test test-rom check-unity
 
 all: $(TARGET)
 
@@ -32,8 +32,13 @@ $(TARGET): $(OBJS)
 test: check-unity $(TEST_BINS)
 	@for test_bin in $(TEST_BINS); do ./$$test_bin || exit 1; done
 
-test-roms: check-unity $(ROMS_DIR)/.git $(BLARGG_TEST_BIN)
-	@BLARGG_ROM_DIR=$(ROMS_DIR) ./$(BLARGG_TEST_BIN)
+test-rom: check-unity $(ROMS_DIR)/.git $(BLARGG_TEST_BIN)
+	@if [ -z "$(ROM)" ]; then \
+		echo "Usage: make test-rom ROM=/path/to/rom.gb"; \
+		exit 1; \
+	fi
+	rom_path="$(ROM)"
+	@BLARGG_ROM="$$rom_path" ./$(BLARGG_TEST_BIN)
 
 check-unity:
 	@test -f $(UNITY_DIR)/unity_internals.h || { \
