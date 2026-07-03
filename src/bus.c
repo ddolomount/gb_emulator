@@ -1,5 +1,5 @@
 #include "../include/bus.h"
-#include <signal.h>
+#include <string.h>
 
 void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge)
 {
@@ -9,15 +9,11 @@ void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge)
 
 uint8_t bus_read8(bus_t *bus, uint16_t addr)
 {
-    // Read from ROM
+    // Read from ROM (cartridge)
     if (addr <= ROM_END_ADDR) 
     {
-        if (addr >= bus->cartridge->rom_size)
-        {
-            return 0xFF;
-        }
-
-        return bus->cartridge->rom[addr];
+        // TODO: Check to see out of bounds behaviour
+        return cartridge_read8(bus->cartridge, addr);
     }
 
     // Read from VRAM
@@ -49,10 +45,16 @@ uint8_t bus_read8(bus_t *bus, uint16_t addr)
     {
         return bus->memory->HRAM[addr - HRAM_START_ADDR];
     }
-
     if (addr == IE_ADDR)
     {
         return bus->memory->ie;
+    }
+
+    // External cartridge RAM / MBC RAM / RTC
+    if (addr >= 0xA000 && addr <= 0xBFFF)
+    {
+        return 0xFF;
+        // return cartridge_read8(bus->cartridge, addr);
     }
 
     return 0xFF;
@@ -72,39 +74,58 @@ uint16_t bus_read16(bus_t *bus, uint16_t addr)
 
 void bus_write8(bus_t *bus, uint16_t addr, uint8_t value)
 {
+    if (addr >= ROM_START_ADDR && addr <= ROM_END_ADDR)
+    {
+        cartridge_write8(bus->cartridge, addr, value);
+        return;
+    }
+
     // Write to VRAM
     if (addr >= VRAM_START_ADDR && addr <= VRAM_END_ADDR)
     {
         bus->memory->VRAM[addr - VRAM_START_ADDR] = value;
+        return;
     }
 
     // Write to WRAM
     if (addr >= WRAM_START_ADDR && addr <= WRAM_END_ADDR)
     {
         bus->memory->WRAM[addr - WRAM_START_ADDR] = value;
+        return;
+    }
+
+    // Write to external cartridge RAM / MBC RAM / RTC 
+    if (addr >= 0xA000 && addr <= 0xBFFF)
+    {
+        cartridge_write8(bus->cartridge, addr, value);
+        return;
     }
 
     // Write to OAM
     if (addr >= OAM_START_ADDR && addr <= OAM_END_ADDR)
     {
         bus->memory->OAM[addr - OAM_START_ADDR] = value;
+        return;
     }
 
     // Write to IO registers
     if (addr >= IO_START_ADDR && addr <= IO_END_ADDR)
     {
         bus->memory->IO[addr - IO_START_ADDR] = value;
+        return;
     }
 
     // Write to HRAM
     if (addr >= HRAM_START_ADDR && addr <= HRAM_END_ADDR)
     {
         bus->memory->HRAM[addr - HRAM_START_ADDR] = value;
+        return;
     }
 
     if (addr == IE_ADDR)
     {
         bus->memory->ie = value;
+        return;
     }
 }
 
