@@ -74,7 +74,7 @@ uint16_t bus_read16(bus_t *bus, uint16_t addr)
 
 void bus_write8(bus_t *bus, uint16_t addr, uint8_t value)
 {
-    if (addr >= ROM_START_ADDR && addr <= ROM_END_ADDR)
+    if (addr <= ROM_END_ADDR)
     {
         cartridge_write8(bus->cartridge, addr, value);
         return;

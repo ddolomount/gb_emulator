@@ -165,8 +165,6 @@ bool cartridge_load(Cartridge_t *cart, const char *path)
 
     cart->mbc_type = cartridge_type_from_header(cartridge_type);
 
-    Ram_size_t ram_size = 0;
-
     fclose(fp);
 
     cart->rom = rom;

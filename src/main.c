@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "../include/cartridge.h"
 
-int main(int argc, char *argv[])
+int main()
 {
     const char *env_value = getenv("ROM");
     
@@ -10,8 +10,10 @@ int main(int argc, char *argv[])
 
     bool res = cartridge_load(&cart, env_value);
 
-    printf("Cart Type: %u\n", cart.mbc_type);
-    printf("Ram size: %u\n", cart.ram_size);
+    if (res)
+    {
+        printf("Cart Type: %u\n", cart.mbc_type);
+    }
 
     return 0;
 }
