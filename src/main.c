@@ -10,9 +10,9 @@ int main()
 
     bool res = cartridge_load(&cart, env_value);
 
-    if (res)
+    if (!res)
     {
-        printf("Cart Type: %u\n", cart.mbc_type);
+        printf("cartridge_load failed\n");
     }
 
     return 0;

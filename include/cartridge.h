@@ -23,26 +23,24 @@ typedef enum {
     CART_UNSUPPORTED
 } Cart_type_t;
 
-typedef enum {
-    RAM_SIZE_NONE,
-    RAM_SIZE_UNUSED,
-    RAM_SIZE_8KB,
-    RAM_SIZE_32KB,
-    RAM_SIZE_128KB,
-    RAM_SIZE_64KB,
-} Ram_size_t;
-
 typedef struct Cartridge_t {
     /* ROM and RAM */
     uint8_t *rom;
     uint8_t *ram;
     size_t rom_size;
-    Ram_size_t ram_size;
+    size_t ram_size;
     
     /* Information about ROM */
     Cart_type_t mbc_type;
     bool has_ram;
+    bool ram_enabled;
     bool has_battery; // TODO: Figure out if this matters in ROM
+    
+
+    /* MBC1 Registers */
+    uint8_t mbc1_bank_low5; // 5-bits
+    uint8_t mbc1_bank_high2; // 2-bits
+    uint8_t banking_mode; // 1-bit
 
 } Cartridge_t;
 

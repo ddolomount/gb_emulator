@@ -21,6 +21,8 @@ typedef struct {
     uint16_t sp;  // Stack Pointer
     uint16_t pc;  // Program Counter/Pointer
     bool ime;     // Interrupt Master Enable
+    bool ime_pending;
+    bool halted;
 } cpu_t;
 
 /*

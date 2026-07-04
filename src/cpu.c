@@ -1,6 +1,4 @@
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "../include/cpu.h"
 
@@ -585,6 +583,44 @@ static uint16_t cpu_pop16(cpu_t *cpu, bus_t *bus)
     return value;
 }
 
+// Handle pending interrupts
+static bool cpu_handle_interrupts(cpu_t *cpu, bus_t *bus)
+{
+    uint8_t ie = bus_read8(bus, 0xFFFF);
+    uint8_t iflag = bus_read8(bus, 0xFF0F);
+    uint8_t pending = ie & iflag & 0x1F;
+
+    if (pending == 0)
+    {
+        return false;
+    }
+
+    if (!cpu->ime)
+    {
+        return false;
+    }
+
+    cpu->ime = false;
+
+    for (uint8_t bit = 0; bit < 5; bit++)
+    {
+        if (pending & (1 << bit))
+        {
+            iflag &= ~(1 << bit);
+            bus_write8(bus, 0xFF0F, iflag);
+
+            uint16_t vector = 0x0040 + (bit * 0x08);
+
+            cpu_push16(cpu, bus, cpu->pc);
+            cpu->pc = vector;
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 /* Global Functions */
 
 void cpu_init(cpu_t *cpu)
@@ -597,8 +633,25 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
 {
     uint8_t cycle_count = 0;
 
+    if (cpu->ime_pending)
+    {
+        cpu->ime = true;
+    }
+
     // TODO: Fetch, Decode, and Execute instruction
-  
+ 
+    if (cpu_handle_interrupts(cpu, bus))
+    {
+        cycle_count = 20;
+        return cycle_count;
+    }
+
+    if (cpu->halted)
+    {
+        cycle_count = 4;
+        return cycle_count;
+    }
+
     // Fetch opcode for instruction
     uint8_t opcode = bus_read8(bus, cpu->pc++);
 
@@ -997,6 +1050,7 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
         {
             cpu->pc = cpu_pop16(cpu, bus);
             cpu->ime = true;
+            cpu->ime_pending = false;
             cycle_count = 16;
             break;
         }
@@ -1263,13 +1317,14 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
         case 0xF3:
         {
             cpu->ime = false;
+            cpu->ime_pending = false;
             cycle_count = 4;
             break;
         }
         // ei
         case 0xFB:
         {
-            cpu->ime = true;
+            cpu->ime_pending = true;
             cycle_count = 4;
             break;
         }

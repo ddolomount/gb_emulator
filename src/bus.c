@@ -53,8 +53,7 @@ uint8_t bus_read8(bus_t *bus, uint16_t addr)
     // External cartridge RAM / MBC RAM / RTC
     if (addr >= 0xA000 && addr <= 0xBFFF)
     {
-        return 0xFF;
-        // return cartridge_read8(bus->cartridge, addr);
+        return cartridge_read8(bus->cartridge, addr);
     }
 
     return 0xFF;
