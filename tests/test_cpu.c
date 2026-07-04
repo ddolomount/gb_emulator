@@ -1,6 +1,8 @@
 #include "unity/unity.h"
 #include "../include/cpu.h"
 
+#define TEST_ROM_SIZE 0x8000
+
 static void assert_branch_registers_unchanged(cpu_t *cpu);
 
 void setUp(void)
@@ -30,7 +32,7 @@ void test_cpu_init_sets_registers_to_zero(void)
 
 void test_cpu_nop_instruction(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     rom[0x0100] = 0x00;
 
     Cartridge_t cartridge = {
@@ -132,7 +134,7 @@ static void assert_ld_r16_common_result(cpu_t *cpu, uint8_t cycles)
 
 void test_ld_bc_imm16(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -157,7 +159,7 @@ void test_ld_bc_imm16(void)
 
 void test_ld_de_imm16(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -183,7 +185,7 @@ void test_ld_de_imm16(void)
 
 void test_ld_hl_imm16(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -209,7 +211,7 @@ void test_ld_hl_imm16(void)
 
 void test_ld_sp_imm16(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -243,7 +245,7 @@ static void assert_ld_r16mem_a_common_result(cpu_t *cpu, uint8_t cycles)
 
 void test_ld_bc_mem_a(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -277,7 +279,7 @@ void test_ld_bc_mem_a(void)
 
 void test_ld_de_mem_a(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -311,7 +313,7 @@ void test_ld_de_mem_a(void)
 
 void test_ld_hli_mem_a(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -345,7 +347,7 @@ void test_ld_hli_mem_a(void)
 
 void test_ld_hld_mem_a(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -388,7 +390,7 @@ static void assert_ld_a_r16mem_common_result(cpu_t *cpu, uint8_t cycles)
 
 void test_ld_a_bc_mem(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -416,7 +418,7 @@ void test_ld_a_bc_mem(void)
 
 void test_ld_a_de_mem(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -444,7 +446,7 @@ void test_ld_a_de_mem(void)
 
 void test_ld_a_hli_mem(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -477,7 +479,7 @@ void test_ld_a_hli_mem(void)
 
 void test_ld_a_hld_mem(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -510,7 +512,7 @@ void test_ld_a_hld_mem(void)
 
 void test_ld_imm16_mem_sp(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -556,7 +558,7 @@ static void assert_r16_one_byte_common_result(cpu_t *cpu, uint8_t cycles)
 
 void test_inc_bc(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -583,7 +585,7 @@ void test_inc_bc(void)
 
 void test_inc_de(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -610,7 +612,7 @@ void test_inc_de(void)
 
 void test_inc_hl(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -637,7 +639,7 @@ void test_inc_hl(void)
 
 void test_inc_sp(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -663,7 +665,7 @@ void test_inc_sp(void)
 
 void test_dec_bc(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -690,7 +692,7 @@ void test_dec_bc(void)
 
 void test_dec_de(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -717,7 +719,7 @@ void test_dec_de(void)
 
 void test_dec_hl(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -744,7 +746,7 @@ void test_dec_hl(void)
 
 void test_dec_sp(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -779,7 +781,7 @@ static void assert_add_hl_r16_common_result(cpu_t *cpu, uint8_t cycles)
 
 void test_add_hl_bc(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -808,7 +810,7 @@ void test_add_hl_bc(void)
 
 void test_add_hl_de_sets_half_carry(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -837,7 +839,7 @@ void test_add_hl_de_sets_half_carry(void)
 
 void test_add_hl_hl_sets_carry_without_setting_zero(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -864,7 +866,7 @@ void test_add_hl_hl_sets_carry_without_setting_zero(void)
 
 void test_add_hl_sp_sets_half_carry_and_carry(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1034,7 +1036,7 @@ void test_pop_r16stk(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -1079,7 +1081,7 @@ void test_push_r16stk(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -1109,7 +1111,7 @@ void test_push_r16stk(void)
 
 void test_ldh_c_mem_a(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1143,7 +1145,7 @@ void test_ldh_c_mem_a(void)
 
 void test_ldh_imm8_mem_a(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1176,7 +1178,7 @@ void test_ldh_imm8_mem_a(void)
 
 void test_ld_imm16_mem_a(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1209,7 +1211,7 @@ void test_ld_imm16_mem_a(void)
 
 void test_ldh_a_c_mem(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1243,7 +1245,7 @@ void test_ldh_a_c_mem(void)
 
 void test_ldh_a_imm8_mem(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1276,7 +1278,7 @@ void test_ldh_a_imm8_mem(void)
 
 void test_ld_a_imm16_mem(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1321,7 +1323,7 @@ void test_add_sp_imm8(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -1362,7 +1364,7 @@ void test_ld_hl_sp_plus_imm8(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -1390,7 +1392,7 @@ void test_ld_hl_sp_plus_imm8(void)
 
 void test_ld_sp_hl(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1419,7 +1421,7 @@ void test_ld_sp_hl(void)
 
 void test_di(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1440,7 +1442,7 @@ void test_di(void)
 
 void test_ei(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1454,14 +1456,15 @@ void test_ei(void)
 
     TEST_ASSERT_EQUAL_UINT8(4, cycles);
     TEST_ASSERT_EQUAL_UINT16(0x0101, cpu.pc);
-    TEST_ASSERT_TRUE(cpu.ime);
+    TEST_ASSERT_FALSE(cpu.ime);
+    TEST_ASSERT_TRUE(cpu.ime_pending);
     TEST_ASSERT_EQUAL_UINT8(0xF0, cpu.f);
     assert_branch_registers_unchanged(&cpu);
 }
 
 void test_cb_prefix_rlc_b(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1509,7 +1512,7 @@ void test_cb_rotate_shift_r8_registers(void)
 
     for (size_t case_i = 0; case_i < sizeof(cases) / sizeof(cases[0]); case_i++) {
         for (size_t reg_i = 0; reg_i < sizeof(reg_ids) / sizeof(reg_ids[0]); reg_i++) {
-            uint8_t rom[0x200] = {0};
+            uint8_t rom[TEST_ROM_SIZE] = {0};
             Memory_t memory;
             Cartridge_t cartridge;
             bus_t bus;
@@ -1550,7 +1553,7 @@ void test_cb_rotate_shift_hl_mem(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -1600,7 +1603,7 @@ void test_cb_bit_b3_r8_registers(void)
             };
 
             for (size_t value_i = 0; value_i < sizeof(value_cases) / sizeof(value_cases[0]); value_i++) {
-                uint8_t rom[0x200] = {0};
+                uint8_t rom[TEST_ROM_SIZE] = {0};
                 Memory_t memory;
                 Cartridge_t cartridge;
                 bus_t bus;
@@ -1635,7 +1638,7 @@ void test_cb_bit_b3_hl_mem(void)
         };
 
         for (size_t value_i = 0; value_i < sizeof(value_cases) / sizeof(value_cases[0]); value_i++) {
-            uint8_t rom[0x200] = {0};
+            uint8_t rom[TEST_ROM_SIZE] = {0};
             Memory_t memory;
             Cartridge_t cartridge;
             bus_t bus;
@@ -1678,7 +1681,7 @@ void test_cb_res_b3_r8_registers(void)
 
     for (uint8_t bit = 0; bit < 8; bit++) {
         for (size_t reg_i = 0; reg_i < sizeof(reg_ids) / sizeof(reg_ids[0]); reg_i++) {
-            uint8_t rom[0x200] = {0};
+            uint8_t rom[TEST_ROM_SIZE] = {0};
             Memory_t memory;
             Cartridge_t cartridge;
             bus_t bus;
@@ -1704,7 +1707,7 @@ void test_cb_res_b3_r8_registers(void)
 void test_cb_res_b3_hl_mem(void)
 {
     for (uint8_t bit = 0; bit < 8; bit++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -1747,7 +1750,7 @@ void test_cb_set_b3_r8_registers(void)
 
     for (uint8_t bit = 0; bit < 8; bit++) {
         for (size_t reg_i = 0; reg_i < sizeof(reg_ids) / sizeof(reg_ids[0]); reg_i++) {
-            uint8_t rom[0x200] = {0};
+            uint8_t rom[TEST_ROM_SIZE] = {0};
             Memory_t memory;
             Cartridge_t cartridge;
             bus_t bus;
@@ -1773,7 +1776,7 @@ void test_cb_set_b3_r8_registers(void)
 void test_cb_set_b3_hl_mem(void)
 {
     for (uint8_t bit = 0; bit < 8; bit++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -1826,7 +1829,7 @@ void test_inc_r8_registers(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -1848,7 +1851,7 @@ void test_inc_r8_registers(void)
 
 void test_inc_hl_mem(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1892,7 +1895,7 @@ void test_dec_r8_registers(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -1914,7 +1917,7 @@ void test_dec_r8_registers(void)
 
 void test_dec_hl_mem(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -1959,7 +1962,7 @@ void test_ld_r8_imm8_registers(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -1980,7 +1983,7 @@ void test_ld_r8_imm8_registers(void)
 
 void test_ld_hl_mem_imm8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2023,7 +2026,7 @@ static void assert_accumulator_one_byte_common_result(cpu_t *cpu, uint8_t cycles
 
 void test_rlca(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2044,7 +2047,7 @@ void test_rlca(void)
 
 void test_rrca(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2065,7 +2068,7 @@ void test_rrca(void)
 
 void test_rla(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2086,7 +2089,7 @@ void test_rla(void)
 
 void test_rra(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2107,7 +2110,7 @@ void test_rra(void)
 
 void test_daa_after_addition(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2128,7 +2131,7 @@ void test_daa_after_addition(void)
 
 void test_daa_after_subtraction(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2149,7 +2152,7 @@ void test_daa_after_subtraction(void)
 
 void test_cpl(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2170,7 +2173,7 @@ void test_cpl(void)
 
 void test_scf(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2191,7 +2194,7 @@ void test_scf(void)
 
 void test_ccf(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2236,7 +2239,7 @@ static void assert_control_flow_registers_unchanged(cpu_t *cpu, uint8_t expected
 
 void test_jr_imm8_forward(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2255,7 +2258,7 @@ void test_jr_imm8_forward(void)
 
 void test_jr_imm8_backward(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2285,7 +2288,7 @@ void test_jr_cond_imm8_taken(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2317,7 +2320,7 @@ void test_jr_cond_imm8_not_taken(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2338,7 +2341,7 @@ void test_jr_cond_imm8_not_taken(void)
 
 void test_stop(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2368,7 +2371,7 @@ void test_ret_cond_taken(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2410,7 +2413,7 @@ void test_ret_cond_not_taken(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2441,7 +2444,7 @@ void test_ret_cond_not_taken(void)
 
 void test_ret(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2470,7 +2473,7 @@ void test_ret(void)
 
 void test_reti(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2511,7 +2514,7 @@ void test_jp_cond_imm16_taken(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2543,7 +2546,7 @@ void test_jp_cond_imm16_not_taken(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2564,7 +2567,7 @@ void test_jp_cond_imm16_not_taken(void)
 
 void test_jp_imm16(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2583,7 +2586,7 @@ void test_jp_imm16(void)
 
 void test_jp_hl(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2622,7 +2625,7 @@ void test_call_cond_imm16_taken(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2663,7 +2666,7 @@ void test_call_cond_imm16_not_taken(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2693,7 +2696,7 @@ void test_call_cond_imm16_not_taken(void)
 
 void test_call_imm16(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2736,7 +2739,7 @@ void test_rst_tgt3(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2774,7 +2777,7 @@ void test_ld_r8_r8_registers(void)
             uint8_t opcode = 0x40 | (dst_id << 3) | src_id;
             uint8_t value = 0x40 + (uint8_t)(dst_i * 8) + (uint8_t)src_i;
 
-            uint8_t rom[0x200] = {0};
+            uint8_t rom[TEST_ROM_SIZE] = {0};
             Memory_t memory;
             Cartridge_t cartridge;
             bus_t bus;
@@ -2807,7 +2810,7 @@ void test_ld_r8_hl_mem(void)
         uint8_t opcode = 0x40 | (dst_id << 3) | 0x06;
         uint8_t value = 0x80 + (uint8_t)i;
 
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2843,7 +2846,7 @@ void test_ld_hl_mem_r8(void)
         uint8_t src_id = src_ids[i];
         uint8_t opcode = 0x40 | (0x06 << 3) | src_id;
 
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
@@ -2918,7 +2921,7 @@ static void assert_alu_a_imm8_common_result(cpu_t *cpu,
 
 void test_add_a_r8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2938,7 +2941,7 @@ void test_add_a_r8(void)
 
 void test_adc_a_r8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2958,7 +2961,7 @@ void test_adc_a_r8(void)
 
 void test_sub_a_r8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2978,7 +2981,7 @@ void test_sub_a_r8(void)
 
 void test_sbc_a_r8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -2998,7 +3001,7 @@ void test_sbc_a_r8(void)
 
 void test_and_a_r8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3018,7 +3021,7 @@ void test_and_a_r8(void)
 
 void test_xor_a_r8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3038,7 +3041,7 @@ void test_xor_a_r8(void)
 
 void test_or_a_r8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3058,7 +3061,7 @@ void test_or_a_r8(void)
 
 void test_cp_a_r8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3078,7 +3081,7 @@ void test_cp_a_r8(void)
 
 void test_add_a_imm8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3096,7 +3099,7 @@ void test_add_a_imm8(void)
 
 void test_adc_a_imm8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3114,7 +3117,7 @@ void test_adc_a_imm8(void)
 
 void test_sub_a_imm8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3132,7 +3135,7 @@ void test_sub_a_imm8(void)
 
 void test_sbc_a_imm8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3150,7 +3153,7 @@ void test_sbc_a_imm8(void)
 
 void test_and_a_imm8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3168,7 +3171,7 @@ void test_and_a_imm8(void)
 
 void test_xor_a_imm8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3186,7 +3189,7 @@ void test_xor_a_imm8(void)
 
 void test_or_a_imm8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3204,7 +3207,7 @@ void test_or_a_imm8(void)
 
 void test_cp_a_imm8(void)
 {
-    uint8_t rom[0x200] = {0};
+    uint8_t rom[TEST_ROM_SIZE] = {0};
     Memory_t memory;
     Cartridge_t cartridge;
     bus_t bus;
@@ -3241,7 +3244,7 @@ void test_alu_a_hl_mem_operands(void)
     };
 
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-        uint8_t rom[0x200] = {0};
+        uint8_t rom[TEST_ROM_SIZE] = {0};
         Memory_t memory;
         Cartridge_t cartridge;
         bus_t bus;
