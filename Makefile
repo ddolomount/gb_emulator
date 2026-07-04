@@ -15,6 +15,7 @@ APP_SRCS := $(filter-out $(SRC_DIR)/main.c,$(SRCS))
 TEST_SRCS := $(shell find $(TEST_DIR) -maxdepth 1 -name 'test_*.c')
 TEST_BINS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/tests/%,$(TEST_SRCS))
 BLARGG_TEST_BIN := $(BUILD_DIR)/tests/test_blargg
+MOONEYE_TEST_BIN := $(BUILD_DIR)/tests/test_mooneye
 
 CPPFLAGS := -I$(INC_DIR)
 TEST_CPPFLAGS := $(CPPFLAGS) -I$(UNITY_DIR)
@@ -22,7 +23,7 @@ CFLAGS := -std=c11 -Wall -Wextra -g
 LDFLAGS :=
 LDLIBS :=
 
-.PHONY: all clean rebuild test test-rom check-unity
+.PHONY: all clean rebuild test test-rom test-mooneye check-unity
 
 all: $(TARGET)
 
@@ -39,6 +40,13 @@ test-rom: check-unity $(ROMS_DIR)/.git $(BLARGG_TEST_BIN)
 	fi
 	rom_path="$(ROM)"
 	@BLARGG_ROM="$$rom_path" ./$(BLARGG_TEST_BIN)
+
+test-mooneye: check-unity $(MOONEYE_TEST_BIN)
+	@if [ -z "$(ROM)" ]; then \
+		echo "Usage: make test-mooneye ROM=/path/to/rom.gb" \
+		exit 1; \
+	fi
+	@MOONEYE_ROM="$(ROM)" ./$(MOONEYE_TEST_BIN)
 
 check-unity:
 	@test -f $(UNITY_DIR)/unity_internals.h || { \
