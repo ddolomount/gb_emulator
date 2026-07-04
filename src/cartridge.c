@@ -1,9 +1,9 @@
 #include "../include/cartridge.h"
 
-#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define RAM_ENABLE   (addr <= 0x1FFF)
 #define ROM_BANK     (addr >= 0x2000 && addr <= 0x3FFF)
@@ -141,7 +141,7 @@ static uint8_t rom_only_read8(Cartridge_t *cart, const uint16_t addr)
         return cart_ram_read(cart, 0, addr - 0xA000);
     }
 
-    return 0x00;
+    return 0xFF;
 }
 
 static uint8_t mbc1_read8(Cartridge_t *cart, const uint16_t addr)
@@ -307,7 +307,7 @@ static size_t cartridge_ram_size_from_header(uint8_t code)
         case 0x03: return 32 * 1024;
         case 0x04: return 128 * 1024;
         case 0x05: return 64 * 1024;
-        default: return 0xFF;
+        default: return 0;
     }
 }
 
@@ -362,6 +362,8 @@ bool cartridge_load(Cartridge_t *cart, const char *path)
         return false;
     }
 
+    memset(cart, 0, sizeof(*cart));
+
     uint8_t cartridge_type = rom[0x0147];
     uint8_t rom_size_code = rom[0x0148];
     uint8_t ram_size_code = rom[0x0149];
@@ -372,11 +374,25 @@ bool cartridge_load(Cartridge_t *cart, const char *path)
 
     cart->mbc_type = cartridge_type_from_header(cartridge_type);
     cart->ram_size = cartridge_ram_size_from_header(ram_size_code);
+    cart->has_ram = cart->ram_size > 0;
+
+    if (cart->has_ram)
+    {
+        cart->ram = calloc(cart->ram_size, 1);
+
+        if (!cart->ram)
+        {
+            free(rom);
+            fclose(fp);
+            return false;
+        }
+    }
+
+    cart->ram_enabled = false;
+    cart->banking_mode = 0;
     cart->rom = rom;
     cart->rom_size = rom_size;
   
-    cart->ram = malloc(cart->ram_size);
-
     if (!cart->ram && cart->ram_size != 0)
     {
         free(rom);
@@ -409,7 +425,7 @@ uint8_t cartridge_read8(Cartridge_t *cart, const uint16_t addr)
         default:
         {
             // TODO: Handle invalid MBC type
-            value = 0x00;
+            value = 0xFF;
             break;
         }
     }
