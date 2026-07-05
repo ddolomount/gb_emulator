@@ -23,6 +23,7 @@ typedef struct {
     bool ime;     // Interrupt Master Enable
     bool ime_pending;
     bool halted;
+    bool stopped;
 } cpu_t;
 
 /*

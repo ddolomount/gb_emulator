@@ -1,5 +1,4 @@
 #include "../include/bus.h"
-#include <string.h>
 
 void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge)
 {

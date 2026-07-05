@@ -595,6 +595,11 @@ static bool cpu_handle_interrupts(cpu_t *cpu, bus_t *bus)
         return false;
     }
 
+    if (cpu->halted)
+    {
+        cpu->halted = false;
+    }
+
     if (!cpu->ime)
     {
         return false;
@@ -609,6 +614,7 @@ static bool cpu_handle_interrupts(cpu_t *cpu, bus_t *bus)
             iflag &= ~(1 << bit);
             bus_write8(bus, 0xFF0F, iflag);
 
+            /* Set PC to interrupt vector based on which interrupt flag is set */
             uint16_t vector = 0x0040 + (bit * 0x08);
 
             cpu_push16(cpu, bus, cpu->pc);
@@ -633,11 +639,6 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
 {
     uint8_t cycle_count = 0;
 
-    if (cpu->ime_pending)
-    {
-        cpu->ime = true;
-    }
-
     // TODO: Fetch, Decode, and Execute instruction
  
     if (cpu_handle_interrupts(cpu, bus))
@@ -646,11 +647,19 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
         return cycle_count;
     }
 
+    if (cpu->stopped)
+    {
+        cycle_count = 4;
+        return cycle_count;
+    }
+
     if (cpu->halted)
     {
         cycle_count = 4;
         return cycle_count;
     }
+
+    bool ime_pending_before_instruction = cpu->ime_pending;
 
     // Fetch opcode for instruction
     uint8_t opcode = bus_read8(bus, cpu->pc++);
@@ -1141,16 +1150,18 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
         // stop
         case 0x10:
         {
-            uint8_t stop_arg = bus_read8(bus, cpu->pc++);
-            (void)stop_arg;
+            /* STOP is encoded as 0x10 0x00
+             * The second byte is usually treated as padding
+             */
+            cpu->pc++;
 
-            // TODO: Handle stop behaviour
-
+            cpu->stopped = true;
             cycle_count = 4;
             break;
         }
         // ld r8, r8
-        case 0x40 ... 0x7F:
+        case 0x40 ... 0x75:
+        case 0x77 ... 0x7F:
         {
             uint8_t src = (opcode & 0x07);
             uint8_t dest = GET_R8_ID(opcode);
@@ -1159,6 +1170,12 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             cpu_set_r8(cpu, bus, dest, value);
 
             cycle_count = (dest == HL_R8_ID || src == HL_R8_ID) ? 8 : 4;
+            break;
+        }
+        case 0x76:
+        {
+            cpu->halted = true;
+            cycle_count = 4;
             break;
         }
         // 8-bit arithmetic operations
@@ -1329,6 +1346,12 @@ uint8_t cpu_step(cpu_t *cpu, bus_t *bus)
             break;
         }
 
+    }
+
+    if (ime_pending_before_instruction)
+    {
+        cpu->ime = true;
+        cpu->ime_pending = false;
     }
 
     // Return number of cycles required for instruction
