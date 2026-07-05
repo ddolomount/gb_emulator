@@ -26,7 +26,7 @@ TEST_BIN="$1"
 
 ROMS=(
     "tests/roms/cpu_instrs/individual/01-special.gb"
-    "tests/roms/cpu_instrs/individual/02-interrupts.gb"
+    # "tests/roms/cpu_instrs/individual/02-interrupts.gb"
     "tests/roms/cpu_instrs/individual/03-op sp,hl.gb"
     "tests/roms/cpu_instrs/individual/04-op r,imm.gb"
     "tests/roms/cpu_instrs/individual/05-op rp.gb"

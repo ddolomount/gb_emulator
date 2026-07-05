@@ -1,0 +1,4 @@
+# Mooneye bits tests
+MOONEYE tests/roms/mooneye/acceptance/bits/mem_oam.gb
+MOONEYE tests/roms/mooneye/acceptance/bits/reg_f.gb
+SKIP tests/roms/mooneye/acceptance/bits/unused_hwio-GS.gb
