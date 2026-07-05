@@ -297,6 +297,15 @@ static Cart_type_t cartridge_type_from_header(const uint8_t type)
     }
 }
 
+static size_t cartridge_rom_size_from_header(uint8_t code)
+{
+    if (code <= 0x08)
+    {
+        return 32 * 1024 * (1 << code);
+    }
+    return 0;
+}
+
 static size_t cartridge_ram_size_from_header(uint8_t code)
 {
     switch (code)
@@ -374,7 +383,15 @@ bool cartridge_load(Cartridge_t *cart, const char *path)
 
     cart->mbc_type = cartridge_type_from_header(cartridge_type);
     cart->ram_size = cartridge_ram_size_from_header(ram_size_code);
+    cart->rom_size = cartridge_rom_size_from_header(rom_size_code);
     cart->has_ram = cart->ram_size > 0;
+
+    if (cart->rom_size != rom_size)
+    {
+        free(rom);
+        fclose(fp);
+        return false;
+    }
 
     if (cart->has_ram)
     {
