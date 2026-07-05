@@ -43,7 +43,7 @@ test-rom: check-unity $(ROMS_DIR)/.git $(BLARGG_TEST_BIN)
 
 test-mooneye: check-unity $(MOONEYE_TEST_BIN)
 	@if [ -z "$(ROM)" ]; then \
-		echo "Usage: make test-mooneye ROM=/path/to/rom.gb" \
+		echo "Usage: make test-mooneye ROM=/path/to/rom.gb"; \
 		exit 1; \
 	fi
 	@MOONEYE_ROM="$(ROM)" ./$(MOONEYE_TEST_BIN)
