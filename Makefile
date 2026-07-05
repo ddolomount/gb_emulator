@@ -29,7 +29,7 @@ CFLAGS := -std=c11 -Wall -Wextra -g
 LDFLAGS :=
 LDLIBS :=
 
-.PHONY: all clean rebuild \
+.PHONY: help all clean rebuild \
 	test test-unit \
 	test-blargg test-blargg-cpu \
 	test-mooneye test-mooneye-mbc1 \
@@ -40,6 +40,32 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+help:
+	@echo "Game Boy Emulator Makefile"
+	@echo
+	@echo "Build targets:"
+	@echo "  make all                     Build the emulator binary: $(TARGET)"
+	@echo "  make                         Same as make all"
+	@echo "  make clean                   Remove build output and emulator binary"
+	@echo "  make rebuild                 Clean and rebuild everything"
+	@echo
+	@echo "Unit tests:"
+	@echo "  make test                    Run normal Unity unit tests"
+	@echo
+	@echo "Single ROM tests:"
+	@echo "  make test-blargg ROM=path    Run one Blargg ROM test"
+	@echo "  make test-mooneye ROM=path   Run one Mooneye ROM test"
+	@echo
+	@echo "ROM test suites:"
+	@echo "  make test-blargg-cpu         Run configured Blargg CPU instruction ROMs"
+	@echo "  make test-mooneye-mbc1       Run configured Mooneye MBC1 ROMs"
+	@echo "  make test-roms               Run all configured ROM test suites"
+	@echo
+	@echo "Examples:"
+	@echo "  make test"
+	@echo "  make test-mooneye ROM=tests/roms/.../bits_bank2.gb"
+	@echo "  make test-blargg ROM=tests/roms/cpu_instrs/individual/01-special.gb"
 
 test: check-unity $(UNIT_TEST_BINS)
 	@for test_bin in $(UNIT_TEST_BINS); do \
