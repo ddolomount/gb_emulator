@@ -239,7 +239,7 @@ static void mbc1_write8(Cartridge_t *cart, const uint16_t addr, const uint8_t va
 
 static Cart_type_t cartridge_type_from_header(const uint8_t type)
 {
-    printf("Type: %u\n", type);
+    // printf("Type: %u\n", type);
     switch (type)
     {
         case 0x00: // ROM
@@ -368,9 +368,9 @@ bool cartridge_load(Cartridge_t *cart, const char *path)
     uint8_t rom_size_code = rom[0x0148];
     uint8_t ram_size_code = rom[0x0149];
 
-    printf("ROM Code: %u, RAM Code: %u\n", rom_size_code, ram_size_code);
+    // printf("ROM Code: %u, RAM Code: %u\n", rom_size_code, ram_size_code);
 
-    printf("ROM Size: %lu bytes\n", rom_size);
+    // printf("ROM Size: %lu bytes\n", rom_size);
 
     cart->mbc_type = cartridge_type_from_header(cartridge_type);
     cart->ram_size = cartridge_ram_size_from_header(ram_size_code);
@@ -400,7 +400,7 @@ bool cartridge_load(Cartridge_t *cart, const char *path)
         return false;
     }
 
-    printf("RAM Size: %lu bytes\n", cart->ram_size);
+    // printf("RAM Size: %lu bytes\n", cart->ram_size);
 
     fclose(fp);
     return true;

@@ -261,7 +261,7 @@ static void report_mooneye_result(const char *rom_path, mooneye_test_result_t re
 
 void test_mooneye_custom(void)
 {
-    const char *rom_path = getenv("ROM");
+    const char *rom_path = getenv("MOONEYE_ROM");
 
     if (!rom_path || rom_path[0] == '\0' || !file_exists(rom_path))
     {

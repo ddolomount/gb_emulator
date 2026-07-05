@@ -285,7 +285,7 @@ static void report_blargg_result(const char *rom_path, rom_test_result_t result)
 
 void test_blargg_custom(void)
 {
-    const char *rom_path = getenv("ROM");
+    const char *rom_path = getenv("BLARGG_ROM");
 
     if (!rom_path || rom_path[0] == '\0' || !file_exists(rom_path))
     {
