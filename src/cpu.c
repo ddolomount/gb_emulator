@@ -31,7 +31,32 @@
 
 /* Static Functions */
 
-static uint16_t cpu_get_r16(cpu_t *cpu, uint8_t reg_id);
+static uint16_t cpu_get_r16(cpu_t *cpu, uint8_t reg_id)
+{
+    switch (reg_id)
+    {
+        case 0:
+        {
+            return ((uint16_t)cpu->b << 8) | cpu->c; // BC
+        }
+        case 1:
+        {
+            return ((uint16_t)cpu->d << 8) | cpu->e; // DE
+        }
+        case 2:
+        {
+            return ((uint16_t)cpu->h << 8) | cpu->l; // HL
+        }
+        case 3:
+        {
+            return cpu->sp; // SP
+        }
+        default:
+        {
+            return 0;
+        }
+    }
+}
 
 static void cpu_set_flag(cpu_t *cpu, uint8_t flag, bool set)
 {
@@ -211,32 +236,7 @@ static void cpu_ld_a_addr(cpu_t *cpu, bus_t *bus, uint16_t addr)
     cpu->a = bus_read8(bus, addr);
 }
 
-static uint16_t cpu_get_r16(cpu_t *cpu, uint8_t reg_id)
-{
-    switch (reg_id)
-    {
-        case 0:
-        {
-            return ((uint16_t)cpu->b << 8) | cpu->c; // BC
-        }
-        case 1:
-        {
-            return ((uint16_t)cpu->d << 8) | cpu->e; // DE
-        }
-        case 2:
-        {
-            return ((uint16_t)cpu->h << 8) | cpu->l; // HL
-        }
-        case 3:
-        {
-            return cpu->sp; // SP
-        }
-        default:
-        {
-            return 0;
-        }
-    }
-}
+
 
 static uint16_t cpu_get_r16stk(cpu_t *cpu, uint8_t reg_id)
 {
