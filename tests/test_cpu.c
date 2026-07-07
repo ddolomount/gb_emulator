@@ -42,8 +42,10 @@ void test_cpu_nop_instruction(void)
 
     Memory_t memory = {0};
     bus_t bus;
+    gb_timer_t timer;
 
-    bus_init(&bus, &memory, &cartridge);
+    timer_init(&timer);
+    bus_init(&bus, &memory, &cartridge, &timer);
 
     cpu_t cpu = {0};
     cpu.pc = 0x0100;
@@ -73,6 +75,8 @@ static void setup_instruction_test(uint8_t *rom,
                                    uint8_t imm_lo,
                                    uint8_t imm_hi)
 {
+    static gb_timer_t timer;
+
     rom[0x0100] = opcode;
     rom[0x0101] = imm_lo;
     rom[0x0102] = imm_hi;
@@ -84,7 +88,8 @@ static void setup_instruction_test(uint8_t *rom,
 
     *memory = (Memory_t){0};
 
-    bus_init(bus, memory, cartridge);
+    timer_init(&timer);
+    bus_init(bus, memory, cartridge, &timer);
 }
 
 static void setup_opcode_test(uint8_t *rom,

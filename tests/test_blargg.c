@@ -187,6 +187,7 @@ static rom_test_result_t run_blargg_rom(const char *rom_path, uint64_t max_steps
     Cartridge_t cartridge = {0};
     Memory_t memory;
     bus_t bus;
+    gb_timer_t timer;
     cpu_t cpu = {0};
     uint64_t last_serial_step = 0;
     size_t last_serial_len = 0;
@@ -200,7 +201,8 @@ static rom_test_result_t run_blargg_rom(const char *rom_path, uint64_t max_steps
     }
 
     blargg_init_post_boot(&cpu, &memory);
-    bus_init(&bus, &memory, &cartridge);
+    timer_init(&timer);
+    bus_init(&bus, &memory, &cartridge, &timer);
 
     for (uint64_t step = 0; step < max_steps; step++) {
         uint8_t cycles = cpu_step(&cpu, &bus);

@@ -168,6 +168,7 @@ static mooneye_test_result_t run_mooneye_rom(const char *rom_path, uint64_t max_
     Cartridge_t cart = {0};
     Memory_t memory;
     bus_t bus;
+    gb_timer_t timer;
     cpu_t cpu = {0};
 
     if (!cartridge_load(&cart, rom_path))
@@ -180,7 +181,8 @@ static mooneye_test_result_t run_mooneye_rom(const char *rom_path, uint64_t max_
     }
 
     mooneye_init_post_boot(&cpu, &memory);
-    bus_init(&bus, &memory, &cart);
+    timer_init(&timer);
+    bus_init(&bus, &memory, &cart, &timer);
 
     for (uint64_t step = 0; step < max_steps; step++)
     {
