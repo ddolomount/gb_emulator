@@ -1,9 +1,10 @@
 #include "../include/bus.h"
 
-void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge)
+void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge, gb_timer_t *timer)
 {
     bus->memory = memory;
     bus->cartridge = cartridge;
+    bus->timer = timer;
 }
 
 uint8_t bus_read8(bus_t *bus, uint16_t addr)
@@ -47,6 +48,11 @@ uint8_t bus_read8(bus_t *bus, uint16_t addr)
     if (addr == IE_ADDR)
     {
         return bus->memory->ie;
+    }
+
+    if (addr >= 0xFF04 && addr <= 0xFF07)
+    {
+        return timer_read8(bus->timer, addr);
     }
 
     // External cartridge RAM / MBC RAM / RTC
