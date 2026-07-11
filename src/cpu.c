@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "../include/cpu.h"
+#include "../include/timer.h"
 
 #define BC_R16_ID 0
 #define DE_R16_ID 1

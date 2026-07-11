@@ -14,7 +14,7 @@ static uint32_t timer_period_cycles(uint8_t tac)
     /* Return the number of cpu cycles before
      * incrementing the tima_counter
      */
-    switch (tac & 0x02)
+    switch (tac & 0x03)
     {
         case 0x00: return 1024; // 4096 Hz
         case 0x01: return 16;   // 262144 Hz
@@ -49,7 +49,7 @@ void timer_tick(gb_timer_t *timer, bus_t *bus, uint8_t cycles)
 
     uint32_t period = timer_period_cycles(timer->tac);
 
-    while (timer->tac >= period)
+    while (timer->tima_counter >= period)
     {
         timer->tima_counter -= period;
 
@@ -100,12 +100,12 @@ void timer_write8(gb_timer_t *timer, uint16_t addr, uint8_t value)
     {
         case REG_DIV:
         {
-            timer->div_counter &= 0x0F;
+            timer->div_counter = 0;
             break;
         }
         case REG_TIMA:
         {
-            // TODO: Figure out if this is writable
+            timer->tima = value;
             break;
         }
         case REG_TMA:
@@ -115,7 +115,7 @@ void timer_write8(gb_timer_t *timer, uint16_t addr, uint8_t value)
         }
         case REG_TAC:
         {
-            timer->tac = (value & 0x03);
+            timer->tac = (value & 0x07);
             break;
         }
         default:
