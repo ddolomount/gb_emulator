@@ -1,0 +1,25 @@
+# Timing tests
+BLARGG tests/roms/instr_timing/instr_timing.gb
+BLARGG tests/roms/interrupt_time/interrupt_time.gb
+
+MOONEYE tests/roms/mooneye/acceptance/add_sp_e_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/call_cc_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/call_cc_timing2.gb
+MOONEYE tests/roms/mooneye/acceptance/call_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/call_timing2.gb
+MOONEYE tests/roms/mooneye/acceptance/di_timing-GS.gb
+MOONEYE tests/roms/mooneye/acceptance/div_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/halt_ime0_nointr_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/halt_ime1_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/halt_ime1_timing2-GS.gb
+MOONEYE tests/roms/mooneye/acceptance/intr_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/jp_cc_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/jp_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/ld_hl_sp_e_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/oam_dma_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/pop_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/push_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/ret_cc_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/ret_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/reti_timing.gb
+MOONEYE tests/roms/mooneye/acceptance/rst_timing.gb

@@ -11,4 +11,4 @@ MOONEYE tests/roms/mooneye/emulator-only/mbc1/rom_4Mb.gb
 MOONEYE tests/roms/mooneye/emulator-only/mbc1/rom_8Mb.gb
 MOONEYE tests/roms/mooneye/emulator-only/mbc1/rom_16Mb.gb
 
-SKIP tests/roms/mts-20240926-1737-443f6e1/emulator-only/mbc1/multicart_rom_8Mb.gb
+SKIP tests/roms/mooneye/emulator-only/mbc1/multicart_rom_8Mb.gb

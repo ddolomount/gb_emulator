@@ -181,6 +181,14 @@ static void poll_blargg_serial(bus_t *bus, rom_test_result_t *result)
     }
 }
 
+static bool blargg_at_post_exit_loop(bus_t *bus, cpu_t *cpu)
+{
+    return bus_read8(bus, cpu->pc - 2) == 0xE0 &&
+           bus_read8(bus, cpu->pc - 1) == 0x26 &&
+           bus_read8(bus, cpu->pc) == 0x18 &&
+           bus_read8(bus, cpu->pc + 1) == 0xFE;
+}
+
 static rom_test_result_t run_blargg_rom(const char *rom_path, uint64_t max_steps)
 {
     rom_test_result_t result = {0};
@@ -206,6 +214,7 @@ static rom_test_result_t run_blargg_rom(const char *rom_path, uint64_t max_steps
 
     for (uint64_t step = 0; step < max_steps; step++) {
         uint8_t cycles = cpu_step(&cpu, &bus);
+        timer_tick(&timer, &bus, cycles);
 
         poll_blargg_serial(&bus, &result);
 
@@ -222,6 +231,11 @@ static rom_test_result_t run_blargg_rom(const char *rom_path, uint64_t max_steps
 
         if (strstr(result.serial_output, "Failed")) {
             result.failed = true;
+            break;
+        }
+
+        if (blargg_at_post_exit_loop(&bus, &cpu)) {
+            result.passed = true;
             break;
         }
 

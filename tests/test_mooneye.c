@@ -187,6 +187,7 @@ static mooneye_test_result_t run_mooneye_rom(const char *rom_path, uint64_t max_
     for (uint64_t step = 0; step < max_steps; step++)
     {
         uint8_t cycles = cpu_step(&cpu, &bus);
+        timer_tick(&timer, &bus, cycles);
 
         if (mooneye_passed(&cpu))
         {

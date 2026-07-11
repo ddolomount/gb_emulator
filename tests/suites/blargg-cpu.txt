@@ -1,6 +1,6 @@
 # Blargg CPU intructions tests
 BLARGG tests/roms/cpu_instrs/individual/01-special.gb
-SKIP tests/roms/cpu_instrs/individual/02-interrupts.gb
+BLARGG tests/roms/cpu_instrs/individual/02-interrupts.gb
 BLARGG tests/roms/cpu_instrs/individual/03-op sp,hl.gb
 BLARGG tests/roms/cpu_instrs/individual/04-op r,imm.gb
 BLARGG tests/roms/cpu_instrs/individual/05-op rp.gb
