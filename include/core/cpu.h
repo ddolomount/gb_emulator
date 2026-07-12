@@ -3,9 +3,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdlib.h>
 
-#include "bus.h"
+#include "core/bus.h"
 
 #define FLAG_Z 0x80
 #define FLAG_N 0x40

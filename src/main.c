@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
-#include "cartridge.h"
+#include "core/cartridge.h"
 
 int main()
 {

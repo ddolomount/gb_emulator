@@ -1,4 +1,4 @@
-#include "cartridge.h"
+#include "core/cartridge.h"
 
 #include <stdint.h>
 #include <stdio.h>

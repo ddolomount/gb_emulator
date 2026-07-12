@@ -5,10 +5,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "memory.h"
-#include "cpu.h"
-#include "cartridge.h"
-#include "bus.h"
+#include "core/memory.h"
+#include "core/cpu.h"
+#include "core/cartridge.h"
+#include "core/bus.h"
 
 // GameBoy struct
 typedef struct {

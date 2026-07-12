@@ -1,5 +1,5 @@
-#include "timer.h"
-#include "bus.h"
+#include "core/timer.h"
+#include "core/bus.h"
 
 #define REG_DIV  0xFF04
 #define REG_TIMA 0xFF05

@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "memory.h"
-#include "cartridge.h"
-#include "timer.h"
+#include "core/memory.h"
+#include "core/cartridge.h"
+#include "core/timer.h"
 
 typedef struct bus {
     Memory_t *memory;

@@ -9,11 +9,27 @@ UNITY_DIR := $(TEST_DIR)/unity
 ROMS_DIR := $(TEST_DIR)/roms
 SCRIPTS_DIR := $(TEST_DIR)/scripts
 
-SRCS := $(shell find $(SRC_DIR) -name '*.c')
+CORE_SRC_DIR := $(SRC_DIR)/core
+FRONTEND_SRC_DIR := $(SRC_DIR)/frontend
+
+CORE_INC_DIR := $(INC_DIR)/core
+FRONTEND_INC_DIR := $(INC_DIR)/frontend
+
+MAIN_SRC := $(SRC_DIR)/main.c
+
+CORE_SRCS := $(shell find $(CORE_SRC_DIR) -name '*.c')
+FRONTEND_SRCS := $(shell find $(FRONTEND_SRC_DIR) -name '*.c')
+
+SRCS := $(MAIN_SRC) $(CORE_SRCS) $(FRONTEND_SRCS)
+
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 DEPS := $(OBJS:.o=.d)
 
-APP_SRCS := $(filter-out $(SRC_DIR)/core/main.c,$(SRCS))
+APP_SRCS := $(CORE_SRCS)
+
+SDL_PACKAGES := sdl3 sdl3-ttf
+SDL_CPPFLAGS := $(shell pkg-config --cflags $(SDL_PACKAGES))
+SDL_LDLIBS := $(shell pkg-config --libs $(SDL_PACKAGES))
 
 UNIT_TEST_SRCS := $(shell find $(TEST_DIR) -maxdepth 1 -name 'test_*.c' \
 				  ! -name 'test_blargg.c' \
@@ -24,7 +40,7 @@ UNIT_TEST_BINS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/tests/%,$(UNIT_TEST_SR
 BLARGG_TEST_BIN := $(BUILD_DIR)/tests/test_blargg
 MOONEYE_TEST_BIN := $(BUILD_DIR)/tests/test_mooneye
 
-CPPFLAGS := -I$(CORE_INC_DIR) -I$(INC_DIR)
+CPPFLAGS := -I$(INC_DIR) $(SDL_CPPFLAGS)
 TEST_CPPFLAGS := $(CPPFLAGS) -I$(UNITY_DIR)
 CFLAGS := -std=c11 -Wall -Wextra -g
 LDFLAGS :=
@@ -40,7 +56,7 @@ LDLIBS :=
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) $(SDL_LDLIBS) -o $@
 
 help:
 	@echo "Game Boy Emulator Makefile"

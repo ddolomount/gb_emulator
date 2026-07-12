@@ -7,10 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "bus.h"
-#include "cartridge.h"
-#include "cpu.h"
-#include "memory.h"
+#include "core/bus.h"
+#include "core/cartridge.h"
+#include "core/cpu.h"
+#include "core/memory.h"
 
 #define BLARGG_SERIAL_SB_ADDR 0xFF01
 #define BLARGG_SERIAL_SC_ADDR 0xFF02
