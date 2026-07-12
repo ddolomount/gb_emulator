@@ -3,6 +3,7 @@ TARGET := gb
 BUILD_DIR := build
 SRC_DIR := src
 INC_DIR := include
+CORE_INC_DIR := $(INC_DIR)/core
 TEST_DIR := tests
 UNITY_DIR := $(TEST_DIR)/unity
 ROMS_DIR := $(TEST_DIR)/roms
@@ -12,7 +13,7 @@ SRCS := $(shell find $(SRC_DIR) -name '*.c')
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 DEPS := $(OBJS:.o=.d)
 
-APP_SRCS := $(filter-out $(SRC_DIR)/main.c,$(SRCS))
+APP_SRCS := $(filter-out $(SRC_DIR)/core/main.c,$(SRCS))
 
 UNIT_TEST_SRCS := $(shell find $(TEST_DIR) -maxdepth 1 -name 'test_*.c' \
 				  ! -name 'test_blargg.c' \
@@ -23,7 +24,7 @@ UNIT_TEST_BINS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/tests/%,$(UNIT_TEST_SR
 BLARGG_TEST_BIN := $(BUILD_DIR)/tests/test_blargg
 MOONEYE_TEST_BIN := $(BUILD_DIR)/tests/test_mooneye
 
-CPPFLAGS := -I$(INC_DIR)
+CPPFLAGS := -I$(CORE_INC_DIR) -I$(INC_DIR)
 TEST_CPPFLAGS := $(CPPFLAGS) -I$(UNITY_DIR)
 CFLAGS := -std=c11 -Wall -Wextra -g
 LDFLAGS :=

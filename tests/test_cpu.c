@@ -1,5 +1,5 @@
 #include "unity/unity.h"
-#include "../include/cpu.h"
+#include "cpu.h"
 
 #define TEST_ROM_SIZE 0x8000
 

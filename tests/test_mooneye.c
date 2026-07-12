@@ -7,10 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../include/bus.h"
-#include "../include/cartridge.h"
-#include "../include/cpu.h"
-#include "../include/memory.h"
+#include "bus.h"
+#include "cartridge.h"
+#include "cpu.h"
+#include "memory.h"
 
 #define MOONEYE_MAX_STEPS 20000000ULL
 #define MOONEYE_DEBUG_MESSAGE_CHARS 3000

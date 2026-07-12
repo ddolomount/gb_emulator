@@ -1,4 +1,4 @@
-#include "../include/bus.h"
+#include "bus.h"
 
 void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge, gb_timer_t *timer)
 {
