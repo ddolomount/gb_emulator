@@ -1,3 +1,5 @@
 build/
 gb
 roms
+.cache
+compile_commands.json
