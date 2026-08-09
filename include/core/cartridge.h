@@ -35,7 +35,6 @@ typedef struct Cartridge_t {
     bool has_ram;
     bool ram_enabled;
     bool has_battery; // TODO: Figure out if this matters in ROM
-    
 
     /* MBC1 Registers */
     uint8_t mbc1_bank_low5; // 5-bits
