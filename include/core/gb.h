@@ -10,6 +10,7 @@
 #include "core/cartridge.h"
 #include "core/bus.h"
 #include "core/timer.h"
+#include "core/ppu.h"
 
 // GameBoy struct
 typedef struct {
@@ -18,6 +19,7 @@ typedef struct {
     Memory_t memory;
     Cartridge_t cartridge;
     gb_timer_t timer;
+    ppu_t ppu;
 } gb_t;
 
 uint8_t gb_mem_read(gb_t *gb, const uint16_t addr);
