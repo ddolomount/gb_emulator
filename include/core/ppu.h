@@ -11,4 +11,6 @@ typedef struct
     uint32_t framebuffer[GB_HEIGHT][GB_WIDTH];
 } ppu_t;
 
+void ppu_init(ppu_t *ppu);
+
 #endif // !PPU_H
