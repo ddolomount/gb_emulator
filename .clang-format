@@ -15,3 +15,6 @@ PointerAlignment: Right
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false
+
+AlignConsecutiveMacros: Consecutive
+AlignConsecutiveAssignments: Consecutive
