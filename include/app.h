@@ -1,5 +1,5 @@
-#include "frontend/display.h"
 #include "core/gb.h"
+#include "frontend/display.h"
 
 typedef struct
 {

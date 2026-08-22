@@ -1,19 +1,20 @@
 #ifndef GB_H
 #define GB_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
-#include "core/memory.h"
-#include "core/cpu.h"
-#include "core/cartridge.h"
 #include "core/bus.h"
-#include "core/timer.h"
-#include "core/ppu.h"
+#include "core/cartridge.h"
+#include "core/cpu.h"
 #include "core/joypad.h"
+#include "core/memory.h"
+#include "core/ppu.h"
+#include "core/timer.h"
 
 // GameBoy struct
-typedef struct {
+typedef struct
+{
     cpu_t cpu;
     bus_t bus;
     Memory_t memory;

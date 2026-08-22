@@ -1,8 +1,8 @@
 #ifndef CARTRIDGE_H
 #define CARTRIDGE_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #define ROM_START_ADDR 0x0000
@@ -11,7 +11,8 @@
 #define BANK0_START_ADDR 0x0000
 #define BANK0_END_ADDR   0x3FFF
 
-typedef enum {
+typedef enum
+{
     CART_ROM_ONLY,
     CART_MBC1,
     CART_MBC2,
@@ -23,13 +24,14 @@ typedef enum {
     CART_UNSUPPORTED
 } Cart_type_t;
 
-typedef struct Cartridge_t {
+typedef struct Cartridge_t
+{
     /* ROM and RAM */
     uint8_t *rom;
     uint8_t *ram;
     size_t rom_size;
     size_t ram_size;
-    
+
     /* Information about ROM */
     Cart_type_t mbc_type;
     bool has_ram;
@@ -37,9 +39,9 @@ typedef struct Cartridge_t {
     bool has_battery; // TODO: Figure out if this matters in ROM
 
     /* MBC1 Registers */
-    uint8_t mbc1_bank_low5; // 5-bits
+    uint8_t mbc1_bank_low5;  // 5-bits
     uint8_t mbc1_bank_high2; // 2-bits
-    uint8_t banking_mode; // 1-bit
+    uint8_t banking_mode;    // 1-bit
 
 } Cartridge_t;
 
