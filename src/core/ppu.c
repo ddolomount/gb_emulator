@@ -64,13 +64,12 @@ void ppu_fsm(ppu_t *ppu)
 void read_tile_data(ppu_t *ppu, bus_t *bus)
 {
     (void)ppu;
+    (void)bus;
 
     /*
      * Each tile takes up 16 bytes
      */
     for (int i = 0; i < TILE_BYTE_SIZE; i++)
     {
-        uint8_t tile_data = bus_read8(bus, VRAM_START_ADDR + i);
-
     }
 }

@@ -1,10 +1,11 @@
 #include "core/bus.h"
 
-void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge, gb_timer_t *timer)
+void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge, gb_timer_t *timer, joypad_t *joypad)
 {
     bus->memory = memory;
     bus->cartridge = cartridge;
     bus->timer = timer;
+    bus->joypad = joypad;
 }
 
 uint8_t bus_read8(bus_t *bus, uint16_t addr)
@@ -42,7 +43,14 @@ uint8_t bus_read8(bus_t *bus, uint16_t addr)
     // Read from IO registers
     if (addr >= IO_START_ADDR && addr <= IO_END_ADDR)
     {
-        return bus->memory->IO[addr - IO_START_ADDR];
+        if (addr == JOYP_ADDR)
+        {
+            return joypad_read(bus->joypad);
+        }
+        else 
+        {
+            return bus->memory->IO[addr - IO_START_ADDR];
+        }
     }
 
     // Read from HRAM

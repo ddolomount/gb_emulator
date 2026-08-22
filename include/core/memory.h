@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdlib.h>
 
 #define VRAM_START_ADDR 0x8000
 #define VRAM_END_ADDR 0x9FFF

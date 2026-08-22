@@ -7,14 +7,16 @@
 #include "core/memory.h"
 #include "core/cartridge.h"
 #include "core/timer.h"
+#include "core/joypad.h"
 
 typedef struct bus {
     Memory_t *memory;
     Cartridge_t *cartridge;
     gb_timer_t *timer;
+    joypad_t *joypad;
 } bus_t;
 
-void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge, gb_timer_t *timer);
+void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge, gb_timer_t *timer, joypad_t *joypad);
 
 uint8_t bus_read8(bus_t *bus, uint16_t addr);
 void bus_write8(bus_t *bus, uint16_t addr, uint8_t value);

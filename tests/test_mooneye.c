@@ -169,6 +169,7 @@ static mooneye_test_result_t run_mooneye_rom(const char *rom_path, uint64_t max_
     Memory_t memory;
     bus_t bus;
     gb_timer_t timer;
+    joypad_t joypad;
     cpu_t cpu = {0};
 
     if (!cartridge_load(&cart, rom_path))
@@ -182,7 +183,8 @@ static mooneye_test_result_t run_mooneye_rom(const char *rom_path, uint64_t max_
 
     mooneye_init_post_boot(&cpu, &memory);
     timer_init(&timer);
-    bus_init(&bus, &memory, &cart, &timer);
+    joypad_init(&joypad);
+    bus_init(&bus, &memory, &cart, &timer, &joypad);
 
     for (uint64_t step = 0; step < max_steps; step++)
     {

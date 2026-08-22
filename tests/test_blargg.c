@@ -196,6 +196,7 @@ static rom_test_result_t run_blargg_rom(const char *rom_path, uint64_t max_steps
     Memory_t memory;
     bus_t bus;
     gb_timer_t timer;
+    joypad_t joypad;
     cpu_t cpu = {0};
     uint64_t last_serial_step = 0;
     size_t last_serial_len = 0;
@@ -210,7 +211,8 @@ static rom_test_result_t run_blargg_rom(const char *rom_path, uint64_t max_steps
 
     blargg_init_post_boot(&cpu, &memory);
     timer_init(&timer);
-    bus_init(&bus, &memory, &cartridge, &timer);
+    joypad_init(&joypad);
+    bus_init(&bus, &memory, &cartridge, &timer, &joypad);
 
     for (uint64_t step = 0; step < max_steps; step++) {
         uint8_t cycles = cpu_step(&cpu, &bus);
