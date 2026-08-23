@@ -9,11 +9,11 @@
 void gb_init(gb_t *gb)
 {
     cpu_init(&gb->cpu);
-    bus_init(&gb->bus, &gb->memory, &gb->cartridge, &gb->timer, &gb->joypad);
     memory_init(&gb->memory);
     timer_init(&gb->timer);
     ppu_init(&gb->ppu);
     joypad_init(&gb->joypad);
+    bus_init(&gb->bus, &gb->memory, &gb->cartridge, &gb->timer, &gb->joypad, &gb->ppu);
 }
 
 void gb_step(gb_t *gb)

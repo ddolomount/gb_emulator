@@ -1,11 +1,13 @@
 #include "core/bus.h"
+#include "core/ppu.h"
 
-void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge, gb_timer_t *timer, joypad_t *joypad)
+void bus_init(bus_t *bus, Memory_t *memory, Cartridge_t *cartridge, gb_timer_t *timer, joypad_t *joypad, ppu_t *ppu)
 {
     bus->memory = memory;
     bus->cartridge = cartridge;
     bus->timer = timer;
     bus->joypad = joypad;
+    bus->ppu = ppu;
 }
 
 uint8_t bus_read8(bus_t *bus, uint16_t addr)
@@ -20,7 +22,7 @@ uint8_t bus_read8(bus_t *bus, uint16_t addr)
     // Read from VRAM
     if (addr >= VRAM_START_ADDR && addr <= VRAM_END_ADDR)
     {
-        return bus->memory->VRAM[addr - VRAM_START_ADDR];
+        return ppu_read(bus->ppu, addr);
     }
 
     // Read from WRAM
@@ -32,7 +34,7 @@ uint8_t bus_read8(bus_t *bus, uint16_t addr)
     // Read from OAM
     if (addr >= OAM_START_ADDR && addr <= OAM_END_ADDR)
     {
-        return bus->memory->OAM[addr - OAM_START_ADDR];
+        return ppu_read(bus->ppu, addr);
     }
 
     if (addr >= 0xFF04 && addr <= 0xFF07)
@@ -95,7 +97,7 @@ void bus_write8(bus_t *bus, uint16_t addr, uint8_t value)
     // Write to VRAM
     if (addr >= VRAM_START_ADDR && addr <= VRAM_END_ADDR)
     {
-        bus->memory->VRAM[addr - VRAM_START_ADDR] = value;
+        ppu_write(bus->ppu, addr, value);
         return;
     }
 
@@ -116,7 +118,7 @@ void bus_write8(bus_t *bus, uint16_t addr, uint8_t value)
     // Write to OAM
     if (addr >= OAM_START_ADDR && addr <= OAM_END_ADDR)
     {
-        bus->memory->OAM[addr - OAM_START_ADDR] = value;
+        ppu_write(bus->ppu, addr, value);
         return;
     }
 

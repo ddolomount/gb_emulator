@@ -44,10 +44,11 @@ void test_cpu_nop_instruction(void)
     bus_t bus;
     gb_timer_t timer;
     joypad_t joypad;
+    ppu_t ppu = {.mode = PPU_MODE_2};
 
     timer_init(&timer);
     joypad_init(&joypad);
-    bus_init(&bus, &memory, &cartridge, &timer, &joypad);
+    bus_init(&bus, &memory, &cartridge, &timer, &joypad, &ppu);
 
     cpu_t cpu = {0};
     cpu.pc = 0x0100;
@@ -79,6 +80,7 @@ static void setup_instruction_test(uint8_t *rom,
 {
     static gb_timer_t timer;
     static joypad_t joypad;
+    static ppu_t ppu;
 
     rom[0x0100] = opcode;
     rom[0x0101] = imm_lo;
@@ -93,7 +95,8 @@ static void setup_instruction_test(uint8_t *rom,
 
     timer_init(&timer);
     joypad_init(&joypad);
-    bus_init(bus, memory, cartridge, &timer, &joypad);
+    ppu = (ppu_t){.mode = PPU_MODE_2};
+    bus_init(bus, memory, cartridge, &timer, &joypad, &ppu);
 }
 
 static void setup_opcode_test(uint8_t *rom,

@@ -22,20 +22,34 @@ typedef enum
     PPU_MODE_3, /* Drawing Pixels */
 } ppu_mode_t;
 
-typedef struct
+typedef struct ppu
 {
+    uint8_t VRAM[0x2000];
+    uint8_t OAM[0xA0];
+
     uint32_t framebuffer[GB_HEIGHT][GB_WIDTH];
 
     ppu_mode_t mode;
 
     uint16_t mode_cycles;
-    uint8_t ly;
+
+    uint8_t scan_index;
 
     bool frame_ready;
+
+    uint8_t scy;
+    uint8_t scx;
+    uint8_t ly;
+    uint8_t lyc;
+    uint8_t wy;
+    uint8_t wx;
 } ppu_t;
 
 void ppu_init(ppu_t *ppu);
 bool ppu_frame_ready(ppu_t *ppu);
+uint32_t *ppu_get_framebuffer(ppu_t *ppu);
 void ppu_step(ppu_t *ppu, uint8_t cycles);
+uint8_t ppu_read(ppu_t *ppu, uint16_t addr);
+void ppu_write(ppu_t *ppu, uint16_t addr, uint8_t value);
 
 #endif // !PPU_H

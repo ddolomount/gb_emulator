@@ -122,7 +122,7 @@ static void append_debug_snapshot(rom_test_result_t *result,
              cpu->l);
 }
 
-static void blargg_init_post_boot(cpu_t *cpu, Memory_t *memory)
+static void blargg_init_post_boot(cpu_t *cpu, Memory_t *memory, ppu_t *ppu)
 {
     memory_init(memory);
 
@@ -138,9 +138,6 @@ static void blargg_init_post_boot(cpu_t *cpu, Memory_t *memory)
     cpu->pc = 0x0100;
     cpu->ime = false;
 
-    memory->IO[0x05] = 0x00;
-    memory->IO[0x06] = 0x00;
-    memory->IO[0x07] = 0x00;
     memory->IO[0x10] = 0x80;
     memory->IO[0x11] = 0xBF;
     memory->IO[0x12] = 0xF3;
@@ -160,15 +157,16 @@ static void blargg_init_post_boot(cpu_t *cpu, Memory_t *memory)
     memory->IO[0x25] = 0xF3;
     memory->IO[0x26] = 0xF1;
     memory->IO[0x40] = 0x91;
-    memory->IO[0x42] = 0x00;
-    memory->IO[0x43] = 0x00;
-    memory->IO[0x45] = 0x00;
     memory->IO[0x47] = 0xFC;
     memory->IO[0x48] = 0xFF;
     memory->IO[0x49] = 0xFF;
-    memory->IO[0x4A] = 0x00;
-    memory->IO[0x4B] = 0x00;
     memory->ie = 0x00;
+
+    ppu->scy = 0x00;
+    ppu->scx = 0x00;
+    ppu->lyc = 0x00;
+    ppu->wy  = 0x00;
+    ppu->wx  = 0x00;
 }
 
 static void poll_blargg_serial(bus_t *bus, rom_test_result_t *result)
@@ -197,6 +195,7 @@ static rom_test_result_t run_blargg_rom(const char *rom_path, uint64_t max_steps
     bus_t bus;
     gb_timer_t timer;
     joypad_t joypad;
+    ppu_t ppu = {.mode = PPU_MODE_2};
     cpu_t cpu = {0};
     uint64_t last_serial_step = 0;
     size_t last_serial_len = 0;
@@ -209,10 +208,10 @@ static rom_test_result_t run_blargg_rom(const char *rom_path, uint64_t max_steps
         return result;
     }
 
-    blargg_init_post_boot(&cpu, &memory);
     timer_init(&timer);
     joypad_init(&joypad);
-    bus_init(&bus, &memory, &cartridge, &timer, &joypad);
+    blargg_init_post_boot(&cpu, &memory, &ppu);
+    bus_init(&bus, &memory, &cartridge, &timer, &joypad, &ppu);
 
     for (uint64_t step = 0; step < max_steps; step++) {
         uint8_t cycles = cpu_step(&cpu, &bus);

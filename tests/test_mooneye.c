@@ -113,7 +113,7 @@ static void append_debug_snapshot(mooneye_test_result_t *result,
              cpu->l);
 }
 
-static void mooneye_init_post_boot(cpu_t *cpu, Memory_t *memory)
+static void mooneye_init_post_boot(cpu_t *cpu, Memory_t *memory, ppu_t *ppu)
 {
     memory_init(memory);
 
@@ -129,9 +129,6 @@ static void mooneye_init_post_boot(cpu_t *cpu, Memory_t *memory)
     cpu->pc = 0x0100;
     cpu->ime = false;
 
-    memory->IO[0x05] = 0x00;
-    memory->IO[0x06] = 0x00;
-    memory->IO[0x07] = 0x00;
     memory->IO[0x10] = 0x80;
     memory->IO[0x11] = 0xBF;
     memory->IO[0x12] = 0xF3;
@@ -151,15 +148,16 @@ static void mooneye_init_post_boot(cpu_t *cpu, Memory_t *memory)
     memory->IO[0x25] = 0xF3;
     memory->IO[0x26] = 0xF1;
     memory->IO[0x40] = 0x91;
-    memory->IO[0x42] = 0x00;
-    memory->IO[0x43] = 0x00;
-    memory->IO[0x45] = 0x00;
     memory->IO[0x47] = 0xFC;
     memory->IO[0x48] = 0xFF;
     memory->IO[0x49] = 0xFF;
-    memory->IO[0x4A] = 0x00;
-    memory->IO[0x4B] = 0x00;
     memory->ie = 0x00;
+
+    ppu->scy = 0x00;
+    ppu->scx = 0x00;
+    ppu->lyc = 0x00;
+    ppu->wy  = 0x00;
+    ppu->wx  = 0x00;
 }
 
 static mooneye_test_result_t run_mooneye_rom(const char *rom_path, uint64_t max_steps)
@@ -170,6 +168,7 @@ static mooneye_test_result_t run_mooneye_rom(const char *rom_path, uint64_t max_
     bus_t bus;
     gb_timer_t timer;
     joypad_t joypad;
+    ppu_t ppu = {.mode = PPU_MODE_2};
     cpu_t cpu = {0};
 
     if (!cartridge_load(&cart, rom_path))
@@ -181,10 +180,10 @@ static mooneye_test_result_t run_mooneye_rom(const char *rom_path, uint64_t max_
         return result;
     }
 
-    mooneye_init_post_boot(&cpu, &memory);
     timer_init(&timer);
     joypad_init(&joypad);
-    bus_init(&bus, &memory, &cart, &timer, &joypad);
+    mooneye_init_post_boot(&cpu, &memory, &ppu);
+    bus_init(&bus, &memory, &cart, &timer, &joypad, &ppu);
 
     for (uint64_t step = 0; step < max_steps; step++)
     {

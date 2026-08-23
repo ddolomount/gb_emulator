@@ -12,6 +12,8 @@ SpaceBeforeParens: ControlStatements
 
 PointerAlignment: Right
 
+IndentCaseLabels: true
+
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false
