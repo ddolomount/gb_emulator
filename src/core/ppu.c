@@ -1,20 +1,8 @@
 #include <string.h>
 
 #include "core/ppu.h"
-#include "core/bus.h"
-#include "core/memory.h"
 
 #define TILE_BYTE_SIZE 16
-
-typedef enum
-{
-    PPU_MODE_0, /* HBlank */
-    PPU_MODE_1, /* VBlank */
-    PPU_MODE_2, /* OAM Scan */
-    PPU_MODE_3, /* Drawing Pixels */
-} ppu_state_t;
-
-static ppu_state_t ppu_state;
 
 void ppu_init(ppu_t *ppu)
 {
@@ -23,33 +11,84 @@ void ppu_init(ppu_t *ppu)
     /*
      * PPU starts in OAM Scan mode
      */
-    ppu_state = PPU_MODE_2;
+    memset(ppu->framebuffer, 0, sizeof(*ppu));
 
-    memset(ppu->framebuffer, 0, sizeof(ppu->framebuffer));
+    ppu->mode        = PPU_MODE_2;
+    ppu->frame_ready = false;
 }
 
-void ppu_fsm(ppu_t *ppu)
+bool ppu_frame_ready(ppu_t *ppu)
 {
-    (void)ppu;
+    return ppu->frame_ready;
+}
 
-    ppu_state_t next_state = PPU_MODE_2;
+void ppu_step(ppu_t *ppu, uint8_t cycles)
+{
+    ppu->mode_cycles += cycles;
+    uint8_t extra_cycles = 0;
+    ppu_mode_t next_mode;
 
-    switch (ppu_state)
+    switch (ppu->mode)
     {
-        case PPU_MODE_0:
-        {
-            break;
-        }
-        case PPU_MODE_1:
-        {
-            break;
-        }
         case PPU_MODE_2:
         {
+            if (ppu->mode_cycles >= 80)
+            {
+                extra_cycles = ppu->mode_cycles - 80;
+                next_mode = PPU_MODE_3;
+            }
+            else
+            {
+                next_mode = PPU_MODE_2;
+            }
             break;
         }
         case PPU_MODE_3:
         {
+            if (ppu->mode_cycles >= 172)
+            {
+                extra_cycles = ppu->mode_cycles - 172;
+                next_mode = PPU_MODE_0;
+            }
+            else
+            {
+                next_mode = PPU_MODE_3;
+            }
+            break;
+        }
+        case PPU_MODE_0:
+        {
+            if (ppu->mode_cycles >= 376)
+            {
+                extra_cycles = ppu->mode_cycles - 376;
+
+                if (ppu->ly < 144)
+                {
+                    next_mode = PPU_MODE_2;
+                }
+                else if (ppu->ly >= 144)
+                {
+                    next_mode = PPU_MODE_1;
+                }
+            }
+            else
+            {
+                next_mode = PPU_MODE_0;
+            }
+            break;
+        }
+        case PPU_MODE_1:
+        {
+            if (ppu->mode_cycles >= 4560)
+            {
+                extra_cycles = ppu->mode_cycles - 4560;
+
+                next_mode = PPU_MODE_2;
+            }
+            else
+            {
+                next_mode = PPU_MODE_1;
+            }
             break;
         }
         default:
@@ -58,18 +97,6 @@ void ppu_fsm(ppu_t *ppu)
         }
     }
 
-    ppu_state = next_state;
-}
-
-void read_tile_data(ppu_t *ppu, bus_t *bus)
-{
-    (void)ppu;
-    (void)bus;
-
-    /*
-     * Each tile takes up 16 bytes
-     */
-    for (int i = 0; i < TILE_BYTE_SIZE; i++)
-    {
-    }
+    ppu->mode_cycles = extra_cycles;
+    ppu->mode = next_mode;
 }

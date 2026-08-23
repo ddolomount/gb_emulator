@@ -18,7 +18,9 @@ void gb_init(gb_t *gb)
 
 void gb_step(gb_t *gb)
 {
-    (void)gb;
+    uint8_t cycles = cpu_step(&gb->cpu, &gb->bus);
+
+    ppu_step(&gb->ppu, cycles);
 }
 
 void gb_reset(gb_t *gb)
