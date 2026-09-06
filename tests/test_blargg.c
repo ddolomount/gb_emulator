@@ -162,11 +162,11 @@ static void blargg_init_post_boot(cpu_t *cpu, Memory_t *memory, ppu_t *ppu)
     memory->IO[0x49] = 0xFF;
     memory->ie = 0x00;
 
-    ppu->scy = 0x00;
-    ppu->scx = 0x00;
-    ppu->lyc = 0x00;
-    ppu->wy  = 0x00;
-    ppu->wx  = 0x00;
+    ppu->registers.scy = 0x00;
+    ppu->registers.scx = 0x00;
+    ppu->registers.lyc = 0x00;
+    ppu->registers.wy  = 0x00;
+    ppu->registers.wx  = 0x00;
 }
 
 static void poll_blargg_serial(bus_t *bus, rom_test_result_t *result)

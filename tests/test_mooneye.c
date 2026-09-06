@@ -153,11 +153,11 @@ static void mooneye_init_post_boot(cpu_t *cpu, Memory_t *memory, ppu_t *ppu)
     memory->IO[0x49] = 0xFF;
     memory->ie = 0x00;
 
-    ppu->scy = 0x00;
-    ppu->scx = 0x00;
-    ppu->lyc = 0x00;
-    ppu->wy  = 0x00;
-    ppu->wx  = 0x00;
+    ppu->registers.scy = 0x00;
+    ppu->registers.scx = 0x00;
+    ppu->registers.lyc = 0x00;
+    ppu->registers.wy  = 0x00;
+    ppu->registers.wx  = 0x00;
 }
 
 static mooneye_test_result_t run_mooneye_rom(const char *rom_path, uint64_t max_steps)
