@@ -69,6 +69,7 @@ help:
 	@echo
 	@echo "Unit tests:"
 	@echo "  make test                        Run normal Unity unit tests"
+	@echo "  make test-unit TEST=path         Run inidividual unit tests"
 	@echo
 	@echo "Single ROM tests:"
 	@echo "  make test-blargg ROM=path        Run one Blargg ROM test"
@@ -92,6 +93,7 @@ help:
 	@echo
 	@echo "Examples:"
 	@echo "  make test"
+	@echo "  make test-unit TEST=test_ppu"
 	@echo "  make test-suite SUITE=mooneye-mbc1"
 	@echo "  make test-suite SUITE=blargg-cpu"
 	@echo "  make test-mooneye ROM=tests/roms/mooneye/emulator-only/mbc1/bits_bank2.gb"
@@ -105,6 +107,19 @@ test: check-unity $(UNIT_TEST_BINS)
 		echo "Running $$test_bin"; \
 		./$$test_bin || exit 1; \
 	done
+
+test-unit: check-unity
+	@if [ -z "$(TEST)" ]; then \
+		echo "Usage: make test-unit TEST=test_name"; \
+		echo; \
+		echo "Available tests:"; \
+		for test_bin in $(UNIT_TEST_BINS); do \
+			echo "	$$(basename $$test_bin)"; \
+		done; \
+		exit 1; \
+	fi
+	@$(MAKE) $(BUILD_DIR)/tests/$(TEST)
+	@./$(BUILD_DIR)/tests/$(TEST)
 
 test-blargg: check-unity $(BLARGG_TEST_BIN)
 	@if [ -z "$(ROM)" ]; then \
